@@ -1,0 +1,8 @@
+{
+    "main": {
+        "title": "Cards Web",
+        "logged": {
+            "message": "You are logged in as user \"{{username}}\"."
+        }
+    }
+}

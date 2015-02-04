@@ -1,0 +1,18 @@
+{
+  "generator-jhipster": {
+    "baseName": "cards",
+    "packageName": "com.ethanaa.cards",
+    "packageFolder": "com/ethanaa/cards",
+    "authenticationType": "token",
+    "hibernateCache": "ehcache",
+    "clusteredHttpSession": "no",
+    "websocket": "no",
+    "databaseType": "sql",
+    "devDatabaseType": "h2Memory",
+    "prodDatabaseType": "postgresql",
+    "useCompass": true,
+    "buildTool": "maven",
+    "frontendBuilder": "grunt",
+    "javaVersion": "7"
+  }
+}

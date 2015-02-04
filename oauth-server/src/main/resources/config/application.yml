@@ -1,0 +1,50 @@
+# Disable the spring security default configuration from spring-boot-actuator
+management.security.enabled: true
+security.basic.enabled: false
+
+# Disable Jolokia - An http/json bridge for remote JMX access
+endpoints.jolokia.enabled: false
+
+# security configuration (this key should be unique for your application, and kept secret)
+jhipster.security.rememberme.key: cards
+
+async:
+    corePoolSize: 2
+    maxPoolSize: 50
+    queueCapacity: 10000
+
+spring:
+    mail:
+        host: smtp.gmail.com
+        port: 587
+        user: ethanaa
+        password: mypass
+        protocol: smtp
+        tls: true
+        auth: true
+        from: ethanaa@gmail.com
+
+    messageSource:
+        cacheSeconds: 1
+
+authentication:
+    clients:
+        oauth:
+            clientid: cardsoauth
+            secret: AdminsAreTheBest
+            tokenValidityInSeconds: 1800        
+        web:
+            clientid: cardsweb
+            secret: mySecretOAuthSecret
+            tokenValidityInSeconds: 1800        
+        game:
+            clientid: cardsgame
+            secret: mySecretOAuthSecret
+            tokenValidityInSeconds: 1800
+
+swagger:
+    title: cards oauth-server API
+    description: cards applications and beyond!
+    contact: ethanaa@gmail.com
+    license: Apache 2.0
+    licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.html
