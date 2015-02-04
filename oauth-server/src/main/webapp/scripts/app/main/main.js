@@ -7,7 +7,7 @@ angular.module('cardsOauthApp')
                 parent: 'site',
                 url: '/',
                 data: {
-                    roles: ['ROLE_ADMIN']
+                    roles: []
                 },
                 views: {
                     'content@': {

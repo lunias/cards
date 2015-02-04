@@ -1,6 +1,6 @@
 {
     "main": {
-        "title": "OAuth2 Admin Console <small>(cards)</small>",
+        "title": "Cards OAuth2 Server",
         "subtitle": "cards",
         "logged": {
             "message": "You are logged in as user \"{{username}}\"."

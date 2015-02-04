@@ -5,13 +5,12 @@ angular.module('cardsOauthApp')
         return {
             login: function(credentials) {
                 var data = "username=" + credentials.username + "&password="
-                    + credentials.password + "&grant_type=password&scope=read%20write%20delete&" +
-                    "client_id=oauthadmin";
+                    + credentials.password + "&grant_type=password&client_id=cardsoauth";
                 return $http.post('oauth/token', data, {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                         "Accept": "application/json",
-                        "Authorization": "Basic " + Base64.encode("oauthadmin" + ':' + "AdminsAreTheBest")
+                        "Authorization": "Basic " + Base64.encode("cardsoauth" + ':' + "AdminsAreTheBest")
                     }
                 }).success(function (response) {
                     var expiredAt = new Date();

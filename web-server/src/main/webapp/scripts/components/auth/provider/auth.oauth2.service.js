@@ -5,13 +5,12 @@ angular.module('jhipsterApp')
         return {
             login: function(credentials) {
                 var data = "username=" + credentials.username + "&password="
-                    + credentials.password + "&grant_type=password&scope=read%20write&" +
-                    "client_id=cardsapp";
+                    + credentials.password + "&grant_type=password&client_id=cardsweb";
                 return $http.post('http://localhost:8081/oauth/token', data, {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
                         "Accept": "application/json",
-                        "Authorization": "Basic " + Base64.encode("cardsapp" + ':' + "mySecretOAuthSecret")
+                        "Authorization": "Basic " + Base64.encode("cardsweb" + ':' + "mySecretOAuthSecret")
                     }
                 }).success(function (response) {
                     var expiredAt = new Date();
