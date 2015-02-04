@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.ethanaa.cards.common.constant.AuthoritiesConstants;
+import com.ethanaa.cards.common.constant.AuthorityConstants;
 
 /**
  * Utility class for Spring Security.
@@ -47,7 +47,7 @@ public final class SecurityUtils {
         Collection<? extends GrantedAuthority> authorities = securityContext.getAuthentication().getAuthorities();
         if (authorities != null) {
             for (GrantedAuthority authority : authorities) {
-                if (authority.getAuthority().equals(AuthoritiesConstants.ANONYMOUS)) {
+                if (authority.getAuthority().equals(AuthorityConstants.ANONYMOUS)) {
                     return false;
                 }
             }

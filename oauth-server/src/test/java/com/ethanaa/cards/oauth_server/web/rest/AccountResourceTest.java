@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.ethanaa.cards.common.constant.AuthoritiesConstants;
+import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.domain.Authority;
 import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.dto.UserDTO;
@@ -119,7 +119,7 @@ public class AccountResourceTest {
     public void testGetExistingAccount() throws Exception {
         Set<Authority> authorities = new HashSet<>();
         Authority authority = new Authority();
-        authority.setName(AuthoritiesConstants.ADMIN);
+        authority.setName(AuthorityConstants.ADMIN);
         authorities.add(authority);
 
         User user = new User();
@@ -138,7 +138,7 @@ public class AccountResourceTest {
                 .andExpect(jsonPath("$.firstName").value("john"))
                 .andExpect(jsonPath("$.lastName").value("doe"))
                 .andExpect(jsonPath("$.email").value("john.doe@jhipter.com"))
-                .andExpect(jsonPath("$.roles").value(AuthoritiesConstants.ADMIN));
+                .andExpect(jsonPath("$.roles").value(AuthorityConstants.ADMIN));
     }
 
     @Test
@@ -160,7 +160,7 @@ public class AccountResourceTest {
             "Shmoe",                // lastName
             "joe@example.com",      // e-mail
             "en",                   // langKey
-            Arrays.asList(AuthoritiesConstants.USER)
+            Arrays.asList(AuthorityConstants.USER)
         );
 
         restMvc.perform(
@@ -183,7 +183,7 @@ public class AccountResourceTest {
             "One",                  // lastName
             "funky@example.com",    // e-mail
             "en",                   // langKey
-            Arrays.asList(AuthoritiesConstants.USER)
+            Arrays.asList(AuthorityConstants.USER)
         );
 
         restUserMockMvc.perform(
@@ -206,7 +206,7 @@ public class AccountResourceTest {
             "Green",            // lastName
             "invalid",          // e-mail <-- invalid
             "en",               // langKey
-            Arrays.asList(AuthoritiesConstants.USER)
+            Arrays.asList(AuthorityConstants.USER)
         );
 
         restUserMockMvc.perform(
@@ -230,7 +230,7 @@ public class AccountResourceTest {
             "Something",            // lastName
             "alice@example.com",    // e-mail
             "en",                   // langKey
-            Arrays.asList(AuthoritiesConstants.USER)
+            Arrays.asList(AuthorityConstants.USER)
         );
 
         // Duplicate login, diff e-mail
@@ -266,7 +266,7 @@ public class AccountResourceTest {
             "Doe",                  // lastName
             "john@example.com",     // e-mail
             "en",                   // langKey
-            Arrays.asList(AuthoritiesConstants.USER)
+            Arrays.asList(AuthorityConstants.USER)
         );
 
         // Duplicate e-mail, diff login
@@ -301,7 +301,7 @@ public class AccountResourceTest {
             "Guy",                  // lastName
             "badguy@example.com",   // e-mail
             "en",                   // langKey
-            Arrays.asList(AuthoritiesConstants.ADMIN) // <-- only admin should be able to do that
+            Arrays.asList(AuthorityConstants.ADMIN) // <-- only admin should be able to do that
         );
 
         restMvc.perform(
@@ -313,6 +313,6 @@ public class AccountResourceTest {
         User userDup = userRepository.findOneByLogin("badguy");
         assertThat(userDup).isNotNull();
         assertThat(userDup.getAuthorities()).hasSize(1)
-            .containsExactly(authorityRepository.findOne(AuthoritiesConstants.USER));
+            .containsExactly(authorityRepository.findOne(AuthorityConstants.USER));
     }
 }

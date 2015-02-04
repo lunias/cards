@@ -1,5 +1,7 @@
 package com.ethanaa.cards.oauth_server.config;
 
+import static com.ethanaa.cards.common.constant.ScopeConstants.*;
+
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
@@ -25,7 +27,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.ethanaa.cards.common.constant.AuthoritiesConstants;
+import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.constant.ResourceConstants;
 import com.ethanaa.cards.oauth_server.security.AjaxLogoutSuccessHandler;
 import com.ethanaa.cards.oauth_server.security.Http401UnauthorizedEntryPoint;
@@ -71,21 +73,21 @@ public class OAuth2ServerConfiguration {
                 .authorizeRequests()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/register").permitAll()
-                .antMatchers("/api/logs/**").hasAnyAuthority(AuthoritiesConstants.ADMIN)
+                .antMatchers("/api/logs/**").hasAnyAuthority(AuthorityConstants.ADMIN)
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/protected/**").authenticated()
-                .antMatchers("/metrics/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/health/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/dump/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/shutdown/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/beans/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/configprops/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/info/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/autoconfig/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/env/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN);
+                .antMatchers("/metrics/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/health/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/trace/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/dump/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/shutdown/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/beans/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/configprops/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/info/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/autoconfig/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/env/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/trace/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/api-docs/**").hasAuthority(AuthorityConstants.ADMIN);
 
         }
     }
@@ -151,27 +153,34 @@ public class OAuth2ServerConfiguration {
                 .inMemory()
                 	.withClient(propertyResolver.getProperty(OAUTH_CLIENTID))
                 		.resourceIds(ResourceConstants.OAUTH_RESOURCE)
-                		.scopes("oauth.read", "oauth.write", "oauth.delete")
+                		.scopes(OAUTH_READ, 
+                				OAUTH_WRITE, 
+                				OAUTH_DELETE)
                 		.autoApprove(true)
-                		.authorities(AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER)
+                		.authorities(AuthorityConstants.ADMIN, AuthorityConstants.USER)
                 		.authorizedGrantTypes("password")
                 		.secret(propertyResolver.getProperty(OAUTH_SECRET))
                 		.accessTokenValiditySeconds(propertyResolver.getProperty(OAUTH_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))                
                 .and()
                 	.withClient(propertyResolver.getProperty(WEB_CLIENTID))
                 		.resourceIds(ResourceConstants.WEB_RESOURCE, ResourceConstants.OAUTH_RESOURCE)
-                		.scopes("web.read", "web.write", "oauth.read")
+                		.scopes(WEB_READ, 
+                				WEB_WRITE, 
+                				OAUTH_READ, 
+                				OAUTH_WRITE)
                 		.autoApprove(true)
-                		.authorities(AuthoritiesConstants.USER)
+                		.authorities(AuthorityConstants.USER)
                 		.authorizedGrantTypes("password")
                 		.secret(propertyResolver.getProperty(WEB_SECRET))
                 		.accessTokenValiditySeconds(propertyResolver.getProperty(WEB_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))
                 .and()
                 	.withClient(propertyResolver.getProperty(GAME_CLIENTID))
                 		.resourceIds(ResourceConstants.GAME_RESOURCE, ResourceConstants.OAUTH_RESOURCE)
-                		.scopes("game.read", "game.write", "oauth.read")
+                		.scopes(GAME_READ, 
+                				GAME_WRITE, 
+                				OAUTH_READ)
                 		.autoApprove(true)
-                		.authorities(AuthoritiesConstants.USER)
+                		.authorities(AuthorityConstants.USER)
                 		.authorizedGrantTypes("password")
                 		.secret(propertyResolver.getProperty(GAME_SECRET))
                 		.accessTokenValiditySeconds(propertyResolver.getProperty(GAME_TOKEN_VALIDITY_SECONDS, Integer.class, 1800));

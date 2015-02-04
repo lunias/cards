@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.ethanaa.cards.common.constant.AuthoritiesConstants;
+import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.constant.ResourceConstants;
 import com.ethanaa.cards.web_server.security.AjaxLogoutSuccessHandler;
 import com.ethanaa.cards.web_server.security.Http401UnauthorizedEntryPoint;
@@ -95,20 +95,20 @@ public class OAuth2ServerConfiguration {
                 .authorizeRequests()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/register").permitAll()
-                .antMatchers("/api/logs/**").hasAnyAuthority(AuthoritiesConstants.ADMIN)
+                .antMatchers("/api/logs/**").hasAnyAuthority(AuthorityConstants.ADMIN)
                 .antMatchers("/api/**").authenticated()
-                .antMatchers("/metrics/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/health/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/dump/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/shutdown/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/beans/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/configprops/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/info/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/autoconfig/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/env/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                .antMatchers("/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                .antMatchers("/metrics/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/health/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/trace/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/dump/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/shutdown/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/beans/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/configprops/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/info/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/autoconfig/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/env/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/trace/**").hasAuthority(AuthorityConstants.ADMIN)
+                .antMatchers("/api-docs/**").hasAuthority(AuthorityConstants.ADMIN)
                 .antMatchers("/protected/**").authenticated();
 
         }                

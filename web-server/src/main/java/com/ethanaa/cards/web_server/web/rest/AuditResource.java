@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ethanaa.cards.common.constant.AuthoritiesConstants;
+import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.web_server.service.AuditEventService;
 import com.ethanaa.cards.web_server.web.propertyeditors.LocaleDateTimeEditor;
 
@@ -37,7 +37,7 @@ public class AuditResource {
     @RequestMapping(value = "/audits/all",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
+    @RolesAllowed(AuthorityConstants.ADMIN)
     public List<AuditEvent> findAll() {
         return auditEventService.findAll();
     }
@@ -45,7 +45,7 @@ public class AuditResource {
     @RequestMapping(value = "/audits/byDates",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    @RolesAllowed(AuthoritiesConstants.ADMIN)
+    @RolesAllowed(AuthorityConstants.ADMIN)
     public List<AuditEvent> findByDates(@RequestParam(value = "fromDate") LocalDateTime fromDate,
                                     @RequestParam(value = "toDate") LocalDateTime toDate) {
         return auditEventService.findByDates(fromDate, toDate);

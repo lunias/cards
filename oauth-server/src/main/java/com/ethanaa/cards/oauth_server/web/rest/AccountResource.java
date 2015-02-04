@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codahale.metrics.annotation.Timed;
+import com.ethanaa.cards.common.constant.ScopeConstants;
 import com.ethanaa.cards.common.domain.Authority;
 import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.dto.RegistrationDTO;
@@ -111,6 +113,7 @@ public class AccountResource {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")     
     public ResponseEntity<UserDTO> getAccount() {
         User user = userService.getUserWithAuthorities();
         if (user == null) {
@@ -139,6 +142,7 @@ public class AccountResource {
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")         
     public ResponseEntity<String> saveAccount(@RequestBody UserDTO userDTO) {
         User userHavingThisLogin = userRepository.findOneByLogin(userDTO.getLogin());
         if (userHavingThisLogin != null && !userHavingThisLogin.getLogin().equals(SecurityUtils.getCurrentLogin())) {
@@ -150,11 +154,12 @@ public class AccountResource {
 
     /**
      * POST  /change_password -> changes the current user's password
-     */
+     */    
     @RequestMapping(value = "/account/change_password",
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")         
     public ResponseEntity<?> changePassword(@RequestBody String password) {
         if (StringUtils.isEmpty(password)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
