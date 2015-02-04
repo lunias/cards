@@ -157,7 +157,7 @@ public class OAuth2ServerConfiguration {
                 				OAUTH_WRITE, 
                 				OAUTH_DELETE)
                 		.autoApprove(true)
-                		.authorities(AuthorityConstants.ADMIN, AuthorityConstants.USER)
+                		.authorities(AuthorityConstants.USER)
                 		.authorizedGrantTypes("password")
                 		.secret(propertyResolver.getProperty(OAUTH_SECRET))
                 		.accessTokenValiditySeconds(propertyResolver.getProperty(OAUTH_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))                

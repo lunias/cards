@@ -1,19 +1,26 @@
 package com.ethanaa.cards.oauth_server.web.rest;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
+import org.postgresql.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -32,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/oauth")
 public class OAuthResource implements EnvironmentAware {
 
-    private static final String ENV_OAUTH = "authentication.oauth.";
+    private static final String ENV_OAUTH = "authentication.clients.";
     private static final String PROP_CLIENTID = "clientid";	
 	
 	private final Logger log = LoggerFactory.getLogger(OAuthResource.class);
@@ -48,6 +55,30 @@ public class OAuthResource implements EnvironmentAware {
     
     private RelaxedPropertyResolver propertyResolver;	
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/token")    
+    public ResponseEntity<?> redirectWithAuthorizationHeaders(HttpServletRequest request) throws URISyntaxException {
+    	
+		String clientId = request.getParameter("client_id");
+		String client = clientId.replaceFirst("cards", "");
+		String clientSecret = propertyResolver.getProperty(client + ".secret");
+
+		HttpHeaders headers = new HttpHeaders();
+		
+		headers.setLocation(
+				new URI(request.getScheme(), 
+						null, 
+						request.getServerName(), 
+						request.getServerPort(), 
+						"oauth/token",
+						request.getQueryString(), null));
+		
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		headers.setAccept(Arrays.asList(new MediaType[] {MediaType.APPLICATION_JSON}));
+		headers.add(HttpHeaders.AUTHORIZATION, Base64.encodeBytes((clientId + ":" + clientSecret).getBytes()));
+
+		return new ResponseEntity<>(null, headers, HttpStatus.FOUND);
+    }
+    
 	@RequestMapping(method = RequestMethod.GET, value = "/tokens")
 	public ResponseEntity<Map<String, Object>> getActiveTokens() {
 		
