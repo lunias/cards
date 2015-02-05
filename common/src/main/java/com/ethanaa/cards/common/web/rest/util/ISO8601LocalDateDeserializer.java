@@ -1,4 +1,4 @@
-package com.ethanaa.cards.common.domain.util;
+package com.ethanaa.cards.common.web.rest.util;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;

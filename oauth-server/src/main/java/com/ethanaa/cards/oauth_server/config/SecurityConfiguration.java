@@ -69,23 +69,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         }
     }
     
-    @Order(-1)    
-    @Configuration
-    protected static class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
-    	
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-        	
-        	http        	
-        		.requestMatchers()
-        			.antMatchers(HttpMethod.POST, "/api/oauth/token")        		
-        			.antMatchers(HttpMethod.OPTIONS, "/oauth/token", "/api/**")
-        	.and()
-        		.authorizeRequests().anyRequest().permitAll()
-        	.and()
-        		.csrf()
-        			.requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/oauth/token"))
-        			.disable();        		
-        }    	
-    }
+//    @Order(-1)    
+//    @Configuration
+//    protected static class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
+//    	
+//        @Override
+//        protected void configure(HttpSecurity http) throws Exception {
+//        	
+//        	http        	
+//        		.requestMatchers()
+//        			.antMatchers(HttpMethod.POST, "/api/oauth/token")        		
+//        			.antMatchers(HttpMethod.OPTIONS, "/oauth/token", "/api/**")
+//        	.and()
+//        		.authorizeRequests().anyRequest().permitAll()
+//        	.and()
+//        		.csrf()
+//        			.requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/oauth/token"))
+//        			.disable();        		
+//        }    	
+//    }
 }

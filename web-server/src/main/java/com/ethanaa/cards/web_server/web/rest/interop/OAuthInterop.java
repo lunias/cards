@@ -9,13 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
+
 public class OAuthInterop extends RestTemplate {
 
 	private String baseUrl;
 
 	public OAuthInterop(String baseUrl) {
 
-		super.setErrorHandler(new OAuthResponseErrorHandler());
+		super.setErrorHandler(new RestTemplateErrorHandler());
 		
 		this.baseUrl = baseUrl;
 	}

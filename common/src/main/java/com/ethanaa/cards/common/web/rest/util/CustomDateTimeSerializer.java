@@ -1,4 +1,4 @@
-package com.ethanaa.cards.common.domain.util;
+package com.ethanaa.cards.common.web.rest.util;
 
 import java.io.IOException;
 
@@ -11,9 +11,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-/**
- * Custom Jackson serializer for displaying Joda DateTime objects.
- */
 public class CustomDateTimeSerializer extends JsonSerializer<DateTime> {
 
     private static DateTimeFormatter formatter = DateTimeFormat
@@ -23,6 +20,7 @@ public class CustomDateTimeSerializer extends JsonSerializer<DateTime> {
     public void serialize(DateTime value, JsonGenerator generator,
                           SerializerProvider serializerProvider)
             throws IOException {
+    	
         generator.writeString(formatter.print(value.toDateTime(DateTimeZone.UTC)));
     }
 

@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.codahale.metrics.annotation.Timed;
 import com.ethanaa.cards.common.web.rest.dto.RegistrationDTO;
 import com.ethanaa.cards.common.web.rest.dto.UserDTO;
+import com.ethanaa.cards.common.web.rest.util.RestUtil;
 import com.ethanaa.cards.web_server.web.rest.interop.OAuthInterop;
-import com.ethanaa.cards.web_server.web.rest.util.RestUtil;
 
 /**
  * REST controller for managing the current user's account.

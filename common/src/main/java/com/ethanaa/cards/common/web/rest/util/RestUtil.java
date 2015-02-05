@@ -1,4 +1,4 @@
-package com.ethanaa.cards.web_server.web.rest.util;
+package com.ethanaa.cards.common.web.rest.util;
 
 import org.springframework.http.HttpStatus;
 

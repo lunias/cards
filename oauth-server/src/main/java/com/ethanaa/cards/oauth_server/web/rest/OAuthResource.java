@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -37,6 +40,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+
+import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
+import com.ethanaa.cards.common.web.rest.util.RestUtil;
 
 @RestController
 @RequestMapping("/api/oauth")
@@ -58,33 +64,57 @@ public class OAuthResource implements EnvironmentAware {
     
     private RelaxedPropertyResolver propertyResolver;	
 	
+    private static final Pattern CLIENT_ID_PATT = Pattern.compile("client_id=cards(.*?)(&|$)");
+    
 	@RequestMapping(method = RequestMethod.POST, value = "/token")
 	public ResponseEntity<?> redirectWithAuthorizationHeaders(
 			@RequestBody String body,
 			HttpServletRequest request) throws Exception {	
 		
-		String[] queryParams = body.split("&");
-		String clientIdParam = queryParams[3];
-		String clientId = clientIdParam.substring(clientIdParam.indexOf('=') + 1);
+		String client = "";
 		
-		String client = clientId.replaceFirst("cards", "");
+		Matcher clientIdMatcher = CLIENT_ID_PATT.matcher(body);
+		if (clientIdMatcher.find()) {
+			client = clientIdMatcher.group(1);
+		} else {
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
+					.body(new InvalidClientException("Could not parse client id"));
+		}
+		
 		String clientSecret = propertyResolver.getProperty(client + ".secret");
+		if (clientSecret == null) {
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
+					.body(new InvalidClientException("Invalid client id"));			
+		}
 		
-		URI forwardUri = new URI(request.getScheme(), 
-				null, 
-				request.getServerName(), 
-				request.getServerPort(), 
-				"/oauth/token",
-				body, null);
+		URI tokenUri = null;
+		try {
+			tokenUri = new URI(request.getScheme(), 
+					null, 
+					request.getServerName(), 
+					request.getServerPort(), 
+					"/oauth/token",
+					body, null);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Could not parse request body");				
+		}
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		headers.setAccept(Arrays.asList(new MediaType[] {MediaType.APPLICATION_JSON}));
-		headers.add(HttpHeaders.AUTHORIZATION, "Basic " + Base64.encodeBytes((clientId + ":" + clientSecret).getBytes()));
+		headers.add(HttpHeaders.AUTHORIZATION,
+				"Basic " + Base64.encodeBytes(("cards" + client + ":" + clientSecret).getBytes()));
 		
 		RestTemplate rest = new RestTemplate();
-		ResponseEntity<OAuth2AccessToken> accessTokenResponse
-			= rest.exchange(forwardUri.toString(), HttpMethod.POST, new HttpEntity<String>(body, headers), OAuth2AccessToken.class); 
+		rest.setErrorHandler(new RestTemplateErrorHandler());
+		
+		ResponseEntity<OAuth2AccessToken> accessTokenResponse = null;
+		accessTokenResponse = rest.exchange(tokenUri.toString(), HttpMethod.POST,
+				new HttpEntity<String>(body, headers), OAuth2AccessToken.class);			
+		
+		if (RestUtil.isError(accessTokenResponse.getStatusCode())) {
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(accessTokenResponse.getBody());
+		}
 		
 		return new ResponseEntity<>(accessTokenResponse.getBody(), accessTokenResponse.getStatusCode());
     }

@@ -13,18 +13,6 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-
-//    @Inject
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth
-//            .userDetailsService(userDetailsService)
-//                .passwordEncoder(passwordEncoder());
-//    }
-
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
@@ -39,11 +27,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/console/**");
     }
 
-//    @Override
-//    @Bean
-//    public AuthenticationManager authenticationManagerBean() throws Exception {
-//        return super.authenticationManagerBean();
-//    }
 
     @EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
     private static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
@@ -52,5 +35,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         protected MethodSecurityExpressionHandler createExpressionHandler() {
             return new OAuth2MethodSecurityExpressionHandler();
         }
-    }
+    }       
 }

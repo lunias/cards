@@ -1,3 +1,4 @@
+
 package com.ethanaa.cards.web_server.config;
 
 import javax.inject.Inject;
@@ -8,6 +9,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -93,6 +95,7 @@ public class OAuth2ServerConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/api/oauth/token").permitAll()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/register").permitAll()
                 .antMatchers("/api/logs/**").hasAnyAuthority(AuthorityConstants.ADMIN)

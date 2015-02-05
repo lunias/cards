@@ -4,9 +4,8 @@ angular.module('jhipsterApp')
     .factory('AuthServerProvider', function loginService($http, localStorageService, Base64) {
         return {
             login: function(credentials) {
-                var data = "username=" + credentials.username + "&password="
-                    + credentials.password + "&grant_type=password&client_id=cardsweb";
-                return $http.post('http://localhost:8081/api/oauth/token', data).success(function (response) {
+                var data = "username=" + credentials.username + "&password=" + credentials.password;
+                return $http.post('/api/oauth/token', data).success(function (response) {
                     var expiredAt = new Date();
                     expiredAt.setSeconds(expiredAt.getSeconds() + response.expires_in);
                     response.expires_at = expiredAt.getTime();
