@@ -29,7 +29,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
-@EntityScan("com.ethanaa.cards.common.domain")
+@EntityScan({"com.ethanaa.cards.common.domain", "com.ethanaa.cards.oauth_server.domain"})
 @EnableJpaRepositories("com.ethanaa.cards.oauth_server.repository")
 @EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")
 @EnableTransactionManagement

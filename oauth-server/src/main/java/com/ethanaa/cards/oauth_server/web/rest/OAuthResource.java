@@ -43,6 +43,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
 import com.ethanaa.cards.common.web.rest.util.RestUtil;
+import com.ethanaa.cards.oauth_server.repository.ClientAccessRepository;
 
 @RestController
 @RequestMapping("/api/oauth")
@@ -60,25 +61,44 @@ public class OAuthResource implements EnvironmentAware {
 	private ConsumerTokenServices tokenServices;
 	
 	@Inject
-	private ClientDetailsService clientDetailsService;	
+	private ClientDetailsService clientDetailsService;
+	
+	@Inject
+	private ClientAccessRepository clientAccessRepo;
     
     private RelaxedPropertyResolver propertyResolver;	
 	
     private static final Pattern CLIENT_ID_PATT = Pattern.compile("client_id=cards(.*?)(&|$)");
+    private static final Pattern USERNAME_PATT = Pattern.compile("username=(.*?)(&|$)");   
     
 	@RequestMapping(method = RequestMethod.POST, value = "/token")
 	public ResponseEntity<?> redirectWithAuthorizationHeaders(
-			@RequestBody String body,
+			@RequestBody String urlEncodedBody,
 			HttpServletRequest request) throws Exception {	
 		
 		String client = "";
 		
-		Matcher clientIdMatcher = CLIENT_ID_PATT.matcher(body);
+		Matcher clientIdMatcher = CLIENT_ID_PATT.matcher(urlEncodedBody);
 		if (clientIdMatcher.find()) {
 			client = clientIdMatcher.group(1);
 		} else {
 			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
 					.body(new InvalidClientException("Could not parse client id"));
+		}
+		
+		String username = "";
+		Matcher usernameMatcher = USERNAME_PATT.matcher(urlEncodedBody);
+		if (usernameMatcher.find()) {
+			username = usernameMatcher.group(1);
+		} else {
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
+					.body(new InvalidClientException("Could not parse username"));
+		}
+		
+		// check if user has access mapped to the requested client
+		if (clientAccessRepo.findFirstByUsernameAndClient(username, client) == null) {
+			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
+					.body(new InvalidClientException("User " + username + " is not authorized for client " + client));			
 		}
 		
 		String clientSecret = propertyResolver.getProperty(client + ".secret");
@@ -94,7 +114,7 @@ public class OAuthResource implements EnvironmentAware {
 					request.getServerName(), 
 					request.getServerPort(), 
 					"/oauth/token",
-					body, null);
+					urlEncodedBody, null);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Could not parse request body");				
 		}
@@ -110,7 +130,7 @@ public class OAuthResource implements EnvironmentAware {
 		
 		ResponseEntity<OAuth2AccessToken> accessTokenResponse = null;
 		accessTokenResponse = rest.exchange(tokenUri.toString(), HttpMethod.POST,
-				new HttpEntity<String>(body, headers), OAuth2AccessToken.class);			
+				new HttpEntity<String>(urlEncodedBody, headers), OAuth2AccessToken.class);			
 		
 		if (RestUtil.isError(accessTokenResponse.getStatusCode())) {
 			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(accessTokenResponse.getBody());

@@ -54,7 +54,7 @@ public class OAuthResource implements EnvironmentAware {
 		} else {
 			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
 					.body(new InvalidClientException("Could not parse username"));
-		}
+		}		
 		
 		String password = "";
 		Matcher passwordMatcher = PASSWORD_PATT.matcher(urlEncodedBody);
