@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -75,11 +76,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Override
         protected void configure(HttpSecurity http) throws Exception {
         	
-        	http
+        	http        	
         		.requestMatchers()
+        			.antMatchers(HttpMethod.POST, "/api/oauth/token")        		
         			.antMatchers(HttpMethod.OPTIONS, "/oauth/token", "/api/**")
         	.and()
-        		.authorizeRequests().anyRequest().permitAll();
+        		.authorizeRequests().anyRequest().permitAll()
+        	.and()
+        		.csrf()
+        			.requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/oauth/token"))
+        			.disable();        		
         }    	
     }
 }
