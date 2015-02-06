@@ -22,6 +22,8 @@ import org.springframework.boot.context.embedded.MimeMappings;
 import org.springframework.boot.context.embedded.ServletContextInitializer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
@@ -35,6 +37,7 @@ import com.ethanaa.cards.oauth_server.web.filter.gzip.GZipServletFilter;
  * Configuration of web application with Servlet 3.0 APIs.
  */
 @Configuration
+@EnableHypermediaSupport(type = { HypermediaType.HAL })
 @AutoConfigureAfter(CacheConfiguration.class)
 public class WebConfigurer implements ServletContextInitializer, EmbeddedServletContainerCustomizer {
 

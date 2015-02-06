@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.domain.Authority;
 import com.ethanaa.cards.common.domain.User;
-import com.ethanaa.cards.common.web.rest.dto.UserDTO;
+import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.Application;
 import com.ethanaa.cards.oauth_server.repository.AuthorityRepository;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
@@ -153,7 +153,7 @@ public class AccountResourceTest {
     @Test
     @Transactional
     public void testRegisterValid() throws Exception {
-        UserDTO u = new UserDTO(
+        UserResource u = new UserResource(
             "joe",                  // login
             "password",             // password
             "Joe",                  // firstName
@@ -176,7 +176,7 @@ public class AccountResourceTest {
     @Test
     @Transactional
     public void testRegisterInvalidLogin() throws Exception {
-        UserDTO u = new UserDTO(
+        UserResource u = new UserResource(
             "funky-log!n",          // login <-- invalid
             "password",             // password
             "Funky",                // firstName
@@ -199,7 +199,7 @@ public class AccountResourceTest {
     @Test
     @Transactional
     public void testRegisterInvalidEmail() throws Exception {
-        UserDTO u = new UserDTO(
+        UserResource u = new UserResource(
             "bob",              // login
             "password",         // password
             "Bob",              // firstName
@@ -223,7 +223,7 @@ public class AccountResourceTest {
     @Transactional
     public void testRegisterDuplicateLogin() throws Exception {
         // Good
-        UserDTO u = new UserDTO(
+        UserResource u = new UserResource(
             "alice",                // login
             "password",             // password
             "Alice",                // firstName
@@ -234,7 +234,7 @@ public class AccountResourceTest {
         );
 
         // Duplicate login, diff e-mail
-        UserDTO dup = new UserDTO(u.getLogin(), u.getPassword(), u.getLogin(), u.getLastName(),
+        UserResource dup = new UserResource(u.getLogin(), u.getPassword(), u.getLogin(), u.getLastName(),
             "alicejr@example.com", u.getLangKey(), u.getRoles());
 
         // Good
@@ -259,7 +259,7 @@ public class AccountResourceTest {
     @Transactional
     public void testRegisterDuplicateEmail() throws Exception {
         // Good
-        UserDTO u = new UserDTO(
+        UserResource u = new UserResource(
             "john",                 // login
             "password",             // password
             "John",                 // firstName
@@ -270,7 +270,7 @@ public class AccountResourceTest {
         );
 
         // Duplicate e-mail, diff login
-        UserDTO dup = new UserDTO("johnjr", u.getPassword(), u.getLogin(), u.getLastName(),
+        UserResource dup = new UserResource("johnjr", u.getPassword(), u.getLogin(), u.getLastName(),
             u.getEmail(), u.getLangKey(), u.getRoles());
 
         // Good
@@ -294,7 +294,7 @@ public class AccountResourceTest {
     @Test
     @Transactional
     public void testRegisterAdminIsIgnored() throws Exception {
-        UserDTO u = new UserDTO(
+        UserResource u = new UserResource(
             "badguy",               // login
             "password",             // password
             "Bad",                  // firstName

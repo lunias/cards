@@ -19,9 +19,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.Application;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
-import com.ethanaa.cards.oauth_server.web.rest.UserResource;
+import com.ethanaa.cards.oauth_server.web.rest.user.UserEndpoint;
 
 /**
  * Test class for the UserResource REST controller.
@@ -32,7 +33,7 @@ import com.ethanaa.cards.oauth_server.web.rest.UserResource;
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
 @IntegrationTest
-public class UserResourceTest {
+public class UserEndpointTest {
 
     @Inject
     private UserRepository userRepository;
@@ -41,9 +42,9 @@ public class UserResourceTest {
 
     @Before
     public void setup() {
-        UserResource userResource = new UserResource();
-        ReflectionTestUtils.setField(userResource, "userRepository", userRepository);
-        this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userResource).build();
+        UserEndpoint userEndpoint = new UserEndpoint();
+        ReflectionTestUtils.setField(userEndpoint, "userRepository", userRepository);
+        this.restUserMockMvc = MockMvcBuilders.standaloneSetup(userEndpoint).build();
     }
 
     @Test

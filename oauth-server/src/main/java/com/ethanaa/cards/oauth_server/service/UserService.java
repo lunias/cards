@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ethanaa.cards.common.domain.Authority;
 import com.ethanaa.cards.common.domain.User;
+import com.ethanaa.cards.common.web.rest.exception.UserNotFoundException;
 import com.ethanaa.cards.oauth_server.repository.AuthorityRepository;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.security.SecurityUtils;
@@ -37,8 +40,75 @@ public class UserService {
     private UserRepository userRepository;
 
     @Inject
-    private AuthorityRepository authorityRepository;
-
+    private AuthorityRepository authorityRepository;        
+    
+    @Transactional(readOnly = true)    
+    public Page<User> getUsersWithAuthorities(Pageable pageable) {
+    	
+    	Page<User> page = userRepository.findAll(pageable);
+    	
+    	for (User user : page.getContent()) {
+    		user.getAuthorities().size(); // load many-to-many
+    	}
+    	
+    	return page;
+    }
+    
+    @Transactional(readOnly = true)   
+    public User getUserWithAuthorities(Long id) throws UserNotFoundException {
+    	
+    	User user = userRepository.findOne(id);
+    	
+    	if (user == null) {
+    		throw new UserNotFoundException(Long.toString(id));
+    	}
+    	
+    	user.getAuthorities().size(); // load many-to-many
+    	
+    	return user;
+    }
+    
+    @Transactional(readOnly = true)
+    public User getUserWithAuthorities(String username) throws UserNotFoundException {
+    	
+    	User user = userRepository.findOneByLogin(username);
+    	
+    	if (user == null) {
+    		throw new UserNotFoundException(username);
+    	}
+    	
+    	user.getAuthorities().size();
+    	
+    	return user;
+    }
+    
+    @Transactional(readOnly = true)
+    public User getUserWithAuthorities() throws UserNotFoundException {
+    	
+    	String currentLogin = SecurityUtils.getCurrentLogin();
+    	
+        User currentUser = userRepository.findOneByLogin(currentLogin);
+        
+        if (currentUser == null) {
+        	throw new UserNotFoundException(currentLogin);
+        }
+        
+        currentUser.getAuthorities().size(); // load many-to-many
+        
+        return currentUser;
+    }
+    
+    public void deleteUser(String username) throws UserNotFoundException {
+    	
+    	User user = userRepository.findOneByLogin(username);
+    	
+    	if (user == null) {
+    		throw new UserNotFoundException(username);
+    	}
+    	
+    	userRepository.delete(user);    	
+    }
+    
     public  User activateRegistration(String key) {
         log.debug("Activating user for activation key {}", key);
         User user = userRepository.findOneByActivationKey(key);
@@ -91,13 +161,6 @@ public class UserService {
         currentUser.setPassword(encryptedPassword);
         userRepository.save(currentUser);
         log.debug("Changed password for User: {}", currentUser);
-    }
-
-    @Transactional(readOnly = true)
-    public User getUserWithAuthorities() {
-        User currentUser = userRepository.findOneByLogin(SecurityUtils.getCurrentLogin());
-        currentUser.getAuthorities().size(); // eagerly load the association
-        return currentUser;
     }
 
 

@@ -1,11 +1,11 @@
-package com.ethanaa.cards.common.web.rest.dto;
+package com.ethanaa.cards.common.web.rest.resource;
 
 import javax.validation.constraints.NotNull;
 
 public class RegistrationDTO {
 
 	@NotNull
-	private UserDTO userDTO;
+	private UserResource userDTO;
 	
 	@NotNull
 	private String baseUrl;
@@ -13,13 +13,13 @@ public class RegistrationDTO {
 	public RegistrationDTO() {		
 	}
 	
-	public RegistrationDTO(UserDTO userDTO, String baseUrl) {
+	public RegistrationDTO(UserResource userDTO, String baseUrl) {
 		
 		this.userDTO = userDTO;
 		this.baseUrl = baseUrl;
 	}
 
-	public UserDTO getUserDTO() {
+	public UserResource getUserDTO() {
 		return userDTO;
 	}
 

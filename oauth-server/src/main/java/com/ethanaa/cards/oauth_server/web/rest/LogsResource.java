@@ -16,7 +16,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 
 import com.codahale.metrics.annotation.Timed;
-import com.ethanaa.cards.common.web.rest.dto.LoggerDTO;
+import com.ethanaa.cards.common.web.rest.resource.LoggerDTO;
 
 /**
  * Controller for view and managing Log Level at runtime.

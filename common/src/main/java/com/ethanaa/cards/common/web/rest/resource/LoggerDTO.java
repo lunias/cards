@@ -1,4 +1,4 @@
-package com.ethanaa.cards.common.web.rest.dto;
+package com.ethanaa.cards.common.web.rest.resource;
 
 import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.annotation.JsonCreator;

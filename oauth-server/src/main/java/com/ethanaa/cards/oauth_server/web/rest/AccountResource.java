@@ -24,8 +24,8 @@ import com.codahale.metrics.annotation.Timed;
 import com.ethanaa.cards.common.constant.ScopeConstants;
 import com.ethanaa.cards.common.domain.Authority;
 import com.ethanaa.cards.common.domain.User;
-import com.ethanaa.cards.common.web.rest.dto.RegistrationDTO;
-import com.ethanaa.cards.common.web.rest.dto.UserDTO;
+import com.ethanaa.cards.common.web.rest.resource.RegistrationDTO;
+import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.security.SecurityUtils;
 import com.ethanaa.cards.oauth_server.service.MailService;
@@ -58,7 +58,7 @@ public class AccountResource {
     @Timed
     public ResponseEntity<?> registerAccount(@Valid @RequestBody RegistrationDTO registrationDTO, HttpServletRequest request) {
     	
-    	UserDTO userDTO = registrationDTO.getUserDTO();
+    	UserResource userDTO = registrationDTO.getUserDTO();
     	String baseUrl = registrationDTO.getBaseUrl();
     	
         User user = userRepository.findOneByLogin(userDTO.getLogin());
@@ -114,7 +114,7 @@ public class AccountResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")     
-    public ResponseEntity<UserDTO> getAccount() {
+    public ResponseEntity<UserResource> getAccount() {
         User user = userService.getUserWithAuthorities();
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -124,7 +124,7 @@ public class AccountResource {
             roles.add(authority.getName());
         }
         return new ResponseEntity<>(
-            new UserDTO(
+            new UserResource(
                 user.getLogin(),
                 null,
                 user.getFirstName(),
@@ -143,7 +143,7 @@ public class AccountResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")         
-    public ResponseEntity<String> saveAccount(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> saveAccount(@RequestBody UserResource userDTO) {
         User userHavingThisLogin = userRepository.findOneByLogin(userDTO.getLogin());
         if (userHavingThisLogin != null && !userHavingThisLogin.getLogin().equals(SecurityUtils.getCurrentLogin())) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

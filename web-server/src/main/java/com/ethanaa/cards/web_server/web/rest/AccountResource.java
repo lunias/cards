@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codahale.metrics.annotation.Timed;
-import com.ethanaa.cards.common.web.rest.dto.RegistrationDTO;
-import com.ethanaa.cards.common.web.rest.dto.UserDTO;
+import com.ethanaa.cards.common.web.rest.resource.RegistrationDTO;
+import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.common.web.rest.util.RestUtil;
 import com.ethanaa.cards.web_server.web.rest.interop.OAuthInterop;
 
@@ -41,7 +41,7 @@ public class AccountResource {
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<?> registerAccount(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {  
+    public ResponseEntity<?> registerAccount(@Valid @RequestBody UserResource userDTO, HttpServletRequest request) {  
     	    	
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();     	
     	
@@ -89,12 +89,12 @@ public class AccountResource {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<UserDTO> getAccount(HttpServletRequest request) {    	
+    public ResponseEntity<UserResource> getAccount(HttpServletRequest request) {    	
     	
-    	ResponseEntity<UserDTO> response = oauthServer
-    			.exchange("/api/account", HttpMethod.GET, UserDTO.class, request);    	    	
+    	ResponseEntity<UserResource> response = oauthServer
+    			.exchange("/api/account", HttpMethod.GET, UserResource.class, request);    	    	
     	
-    	return new ResponseEntity<UserDTO>(response.getBody(), response.getStatusCode());    	
+    	return new ResponseEntity<UserResource>(response.getBody(), response.getStatusCode());    	
     }       
 
     /**
@@ -104,9 +104,9 @@ public class AccountResource {
             method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<String> saveAccount(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+    public ResponseEntity<String> saveAccount(@RequestBody UserResource userDTO, HttpServletRequest request) {
     	
-    	ResponseEntity<String> response = oauthServer.exchange("/api/account", HttpMethod.POST, new HttpEntity<UserDTO>(userDTO), String.class, request);
+    	ResponseEntity<String> response = oauthServer.exchange("/api/account", HttpMethod.POST, new HttpEntity<UserResource>(userDTO), String.class, request);
     	
     	return new ResponseEntity<String>(response.getBody(), response.getStatusCode());    	
     }
