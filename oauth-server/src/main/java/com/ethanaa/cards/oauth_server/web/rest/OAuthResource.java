@@ -98,7 +98,7 @@ public class OAuthResource implements EnvironmentAware {
 		// check if user has access mapped to the requested client
 		if (clientAccessRepo.findFirstByUsernameAndClient(username, client) == null) {
 			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
-					.body(new InvalidClientException("User " + username + " is not authorized for client " + client));			
+					.body(new InvalidClientException("User '" + username + "' is not authorized for client '" + client + "'"));			
 		}
 		
 		String clientSecret = propertyResolver.getProperty(client + ".secret");
