@@ -18,7 +18,7 @@
 
 			<div ng-switch="isAuthenticated()">
 			
-				<div id="user-grid" ng-show="isInRole('ROLE_ADMIN')" ui-grid="{ data: users }">
+				<div id="user-grid" ng-show="isInRole('ROLE_ADMIN')" ui-grid="userGridOptions" ui-grid-infinite-scroll ui-grid-auto-resize>
 				</div>						
 			
 			</div>

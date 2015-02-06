@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('cardsOauthApp', ['LocalStorageModule', 'tmh.dynamicLocale',
-    'ngResource', 'ui.router', 'ngCookies', 'pascalprecht.translate', 'ngCacheBuster', 'ui.grid'])
+    'ngResource', 'ui.router', 'ngCookies', 'pascalprecht.translate', 'ngCacheBuster',
+    'ui.grid', 'ui.grid.autoResize', 'ui.grid.infiniteScroll'])
 
     .run(function ($rootScope, $location, $http, $state, $translate, Auth, Principal, Language) {
         $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams) {
