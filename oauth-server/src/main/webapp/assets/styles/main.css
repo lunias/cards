@@ -7990,3 +7990,7 @@ ul#strength {
 }
 
 /* end Password strength bar style */
+@media -sass-debug-info{filename{font-family:file\:\/\/C\:\/cygwin64\/home\/EAnderson56\/git-clones\/cards\/oauth-server\/src\/main\/scss\/main\.scss}line{font-family:\00003104}}
+#user-grid {
+  height: 500px;
+}
