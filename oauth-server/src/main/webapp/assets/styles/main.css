@@ -7990,3 +7990,8 @@ ul#strength {
 }
 
 /* end Password strength bar style */
+/* line 104, ../../../scss/main.scss */
+#user-grid {
+  width: 500px;
+  height: 250px;
+}
