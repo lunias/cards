@@ -104,3 +104,8 @@ ul#strength {
 #user-grid {
 	height: 500px;
 }
+
+.hover-grid-cell:hover {
+	background-color: #DFF0D8 !important;
+	cursor: pointer;
+}

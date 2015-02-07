@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('cardsOauthApp').controller('MainController',
-		function($scope, Principal, User) {
+		function($scope, $templateCache, Principal, User) {
 
 			$scope.isAuthenticated = Principal.isAuthenticated;
 			$scope.isInRole = Principal.isInRole;
@@ -10,32 +10,46 @@ angular.module('cardsOauthApp').controller('MainController',
 				$scope.account = account;
 			});
 
-			var totalPages = 0;
-			var currentPage = 0;
-			var sortField = '';
-			var sortDir = '';
+			$templateCache.put('user-grid-row',
+					"<div ng-click=\"$parent.getExternalScopes().rowClick(row.entity)\" ng-repeat=\"(colRenderIndex, col) in colContainer.renderedColumns track by col.colDef.name\" class=\"ui-grid-cell hover-grid-cell\" ng-class=\"{ 'ui-grid-row-header-cell': col.isRowHeader }\" ui-grid-cell></div>"
+			);
+			
+			$templateCache.put('user-grid-footer',
+					"<div class=\"ui-grid-bottom-panel\" style=\"text-align: right\; padding: 52px 5px 0px 0px;\">Total Users: {{ getExternalScopes().totalElements }}</div>");
 			
 			$scope.userGridOptions = {
+				externalScope: $scope.gridScope,
 				infiniteScrollPercentage : 15,
-				showGridFooter : true,
+				showFooter : true,
 				enableFiltering : true,
+				useExternalSorting: true,
+				enableRowSelection: true,
 				columnDefs : [ {
-					field : 'login'
+					field : 'login',
+					allowCellFocus: false
 				}, {
-					field : 'firstName'
+					field : 'firstName',
+					allowCellFocus: false					
 				}, {
-					field : 'lastName'
+					field : 'lastName',
+					allowCellFocus: false					
 				}, {
-					field : 'email'
+					field : 'email',
+					allowCellFocus: false					
 				}, {
-					field : 'langKey'
+					field : 'langKey',
+					allowCellFocus: false					
 				} ],
-				onRegisterApi : function(gridApi) {
+				rowHeight: 50,
+				rowTemplate: 'user-grid-row',
+				footerTemplate: 'user-grid-footer',
+				enableHorizontalScrollbar: false,
+				onRegisterApi : function(gridApi) {					
 					
 					gridApi.infiniteScroll.on.needLoadMoreData($scope, function() {
 						
-						if (currentPage < totalPages - 1) {
-							++currentPage;
+						if ($scope.currentPage < $scope.totalPages - 1) {
+							++$scope.currentPage;
 						} else {
 							return;
 						}
@@ -48,13 +62,13 @@ angular.module('cardsOauthApp').controller('MainController',
 						});
 					});
 					
-					gridApi.core.on.sortChanged($scope, function(grid, sortColumns) {
+					gridApi.core.on.sortChanged($scope, function(grid, sortColumns) {						
 						
 						// TODO support multi column sort
-						sortField = sortColumns.length ? sortColumns[0].field : '';
-						sortDir = sortColumns.length ? sortColumns[0].sort.direction : '';
-						currentPage = 0;
-							
+						$scope.currentPage = 0;
+						$scope.sortField = sortColumns.length ? sortColumns[0].field : '';
+						$scope.sortDir = sortColumns.length ? sortColumns[0].sort.direction : '';													
+						
 						// scroll to top
 						gridApi.cellNav
 						.scrollTo(
@@ -63,12 +77,11 @@ angular.module('cardsOauthApp').controller('MainController',
 								$scope.userGridOptions.data[0],
 								$scope.userGridOptions.columnDefs[0]);						
 						
-						updateUserGrid(true);												
-						
+						updateUserGrid(true);										
 						grid.options.loadTimout = false;
 					});
 				} 
-			}
+			};			
 			
 			function updateUserGrid(replaceData, success, err) {
 				
@@ -77,15 +90,16 @@ angular.module('cardsOauthApp').controller('MainController',
 				var error = err || angular.noop;
 				
 				var params = {
-						page: currentPage
+						page: $scope.currentPage
 				};
 				
-				if (sortField) params.sort = sortField + ',' + sortDir;
+				if ($scope.sortField) params.sort = $scope.sortField + ',' + $scope.sortDir;
 				
 				User.findAll(params, function(usersResponse) {
 				
-					currentPage = usersResponse.page.number;
-					totalPages = usersResponse.page.totalPages;					
+					$scope.currentPage = usersResponse.page.number;
+					$scope.totalPages = usersResponse.page.totalPages;
+					$scope.gridScope.totalElements = usersResponse.page.totalElements;
 					
 					if (replaceData) {
 						$scope.userGridOptions.data = usersResponse.body;						
@@ -103,6 +117,15 @@ angular.module('cardsOauthApp').controller('MainController',
 				});								
 			}
 			
+			$scope.currentPage = 0;
+			$scope.totalPages = 0;
+			$scope.sortField = '';
+			$scope.sortDir = '';			
 			updateUserGrid();
-
+			
+			$scope.gridScope = {
+					rowClick: function (user) {
+						console.log(user.login);
+					}	
+			};
 		});
