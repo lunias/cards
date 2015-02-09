@@ -16,6 +16,7 @@ angular.module('cardsOauthApp').factory('User', function($resource) {
         	}
         },
         
-        'update': { method: 'PUT' }
+        'update': { method: 'PUT' },
+        'remove': { method: 'DELETE' }
     });	
 });

@@ -18,7 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ethanaa.cards.common.domain.Authority;
 import com.ethanaa.cards.common.domain.User;
+import com.ethanaa.cards.common.web.rest.exception.CurrentUserDeletionException;
+import com.ethanaa.cards.common.web.rest.exception.EmailAlreadyExistsException;
 import com.ethanaa.cards.common.web.rest.exception.UserNotFoundException;
+import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.repository.AuthorityRepository;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.security.SecurityUtils;
@@ -98,7 +101,33 @@ public class UserService {
         return currentUser;
     }
     
+    public User updateUser(UserResource userResource) throws UserNotFoundException, EmailAlreadyExistsException {
+    	
+    	String requestedEmail = userResource.getEmail();
+    	String requestedLogin = userResource.getLogin();
+    	
+    	User user = getUserWithAuthorities(requestedLogin);    	
+    	if (user == null) {
+    		throw new UserNotFoundException(requestedLogin);
+    	}    	    
+    	
+    	User existingEmailUser = userRepository.findOneByEmail(userResource.getEmail());
+    	if (existingEmailUser != null && !requestedEmail.equals(user.getEmail())) {
+    		throw new EmailAlreadyExistsException(requestedEmail);
+    	}
+    	
+    	user.setFirstName(userResource.getFirstName());
+    	user.setLastName(userResource.getLastName());
+    	user.setEmail(requestedEmail);
+    	
+    	return userRepository.save(user);
+    }
+    
     public void deleteUser(String username) throws UserNotFoundException {
+    	
+    	if (username.equals(SecurityUtils.getCurrentLogin())) {
+    		throw new CurrentUserDeletionException(username);
+    	}
     	
     	User user = userRepository.findOneByLogin(username);
     	

@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,6 +87,21 @@ public class UserEndpoint {
         
         return new ResponseEntity<>(userAssembler.toResource(user), HttpStatus.OK);
     }
+    
+    @RequestMapping(value = "/{login}",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")    
+    public ResponseEntity<UserResource> updateUser(@PathVariable String login, @RequestBody UserResource userResource) {
+    	
+        log.debug("REST request to update User : {}", login);                
+        
+        User user = userService.updateUser(userResource);
+        
+        return new ResponseEntity<>(userAssembler.toResource(user), HttpStatus.OK);
+    }    
     
     @RequestMapping(value = "/{login}",
             method = RequestMethod.DELETE,
