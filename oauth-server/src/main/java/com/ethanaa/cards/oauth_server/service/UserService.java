@@ -120,6 +120,17 @@ public class UserService {
     	user.setLastName(userResource.getLastName());
     	user.setEmail(requestedEmail);
     	
+    	Set<Authority> validAuthorities = new HashSet<>();
+    	for (String role : userResource.getRoles()) {
+    		
+    		Authority authority = authorityRepository.findOne(role);    		
+    		if (authority != null) {
+        		validAuthorities.add(authority);	
+    		}
+    	}
+    	
+    	user.setAuthorities(validAuthorities);
+    	
     	return userRepository.save(user);
     }
     
