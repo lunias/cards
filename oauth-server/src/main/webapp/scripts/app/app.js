@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('cardsOauthApp', ['LocalStorageModule', 'tmh.dynamicLocale',
+angular.module('cardsOauthApp', ['LocalStorageModule', 'tmh.dynamicLocale', 'ngSanitize',
     'ngResource', 'ui.router', 'ngCookies', 'pascalprecht.translate', 'ngCacheBuster',
-    'ui.grid', 'ui.grid.autoResize', 'ui.grid.infiniteScroll', 'ui.grid.cellNav', 'ui.bootstrap.modal', 'ui.bootstrap.tpls'])
+    'ui.grid', 'ui.grid.autoResize', 'ui.grid.infiniteScroll', 'ui.grid.cellNav', 'ui.bootstrap.modal', 'ui.bootstrap.tpls', 'ui.select'])
 
     .run(function ($rootScope, $location, $http, $state, $translate, Auth, Principal, Language) {
         $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams) {

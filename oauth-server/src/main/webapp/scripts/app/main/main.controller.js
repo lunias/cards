@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('cardsOauthApp').controller('MainController',
-		function($scope, $templateCache, $modal, Principal, User) {
+		function($scope, $q, $templateCache, $modal, Principal, User, Authority) {
 
 			$scope.isAuthenticated = Principal.isAuthenticated;
 			$scope.isInRole = Principal.isInRole;
@@ -149,6 +149,21 @@ angular.module('cardsOauthApp').controller('MainController',
 			  					},
 			  					field: function() {
 			  						return field;
+			  					},
+			  					availableRoles: function() {
+			  						
+			  						var deferred = $q.defer();
+			  						
+			  						Authority.findAll(function(authorities) {
+			  							
+			  							var mapped = authorities.map(function(authority) {
+			  								return authority.name;
+			  							});
+			  							
+				  						deferred.resolve(mapped);
+			  						});			  						
+			  						
+			  						return deferred.promise;
 			  					}
 			  				}
 			  			});

@@ -1,11 +1,13 @@
 'use strict';
 
-angular.module('cardsOauthApp').controller('EditUserModalController', function($scope, $modalInstance, user, field) {		
+angular.module('cardsOauthApp').controller('EditUserModalController', function($scope, $modalInstance, user, field, availableRoles) {		
 	
 	$scope.user = {};
 	angular.extend($scope.user, user);
 	
 	$scope.field = field;
+	
+	$scope.availableRoles = availableRoles;
 	
 	$scope.save = function () {
 		
