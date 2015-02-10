@@ -1,5 +1,7 @@
 package com.ethanaa.cards.oauth_server.web.rest.user;
 
+import java.util.Set;
+
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 
@@ -24,6 +26,7 @@ import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.constant.ScopeConstants;
 import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.domain.User;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.ethanaa.cards.oauth_server.service.UserService;
 
 /**
@@ -70,9 +73,6 @@ public class UserEndpoint {
         return new ResponseEntity<>(userAssembler.toResource(user), HttpStatus.OK);
     }
     
-    /**
-     * GET  /users/:login -> get the "login" user.
-     */
     @RequestMapping(value = "/{login}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -116,5 +116,16 @@ public class UserEndpoint {
         userService.deleteUser(login);        
         
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    
+    @RequestMapping(value = "/{login}/clientDetails",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")       
+    public ResponseEntity<Set<OAuthClientDetails>> getClientDetails(@PathVariable String login) {
+    	
+        return new ResponseEntity<>(userService.getUserClientDetails(login), HttpStatus.OK);    	
     }
 }

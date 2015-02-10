@@ -1,6 +1,12 @@
 package com.ethanaa.cards.oauth_server.domain.oauth;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,11 +17,15 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Table(name = "oauth_client_details")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class OAuthClientDetails implements Serializable {
+public class OAuthClientDetails implements ClientDetails, Serializable {
 
 	private static final long serialVersionUID = 4049425310865326805L;
 	
@@ -59,89 +69,135 @@ public class OAuthClientDetails implements Serializable {
 
     public OAuthClientDetails() {
 	}
+    
+    public OAuthClientDetails(ClientDetails clientDetails) {
+    	
+    	this.clientId = clientDetails.getClientId();
+    	this.resourceIds = StringUtils.collectionToCommaDelimitedString(clientDetails.getResourceIds());
+    	this.clientSecret = clientDetails.getClientSecret();
+    	this.scope = StringUtils.collectionToCommaDelimitedString(clientDetails.getScope());
+    	this.authorizedGrantTypes = StringUtils.collectionToCommaDelimitedString(clientDetails.getAuthorizedGrantTypes());
+    	this.webServerRedirectUri = StringUtils.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri());
+    	this.authorities = StringUtils.collectionToCommaDelimitedString(clientDetails.getAuthorities());
+    	this.accessTokenValidity = clientDetails.getAccessTokenValiditySeconds();
+    	this.refreshTokenValidity = clientDetails.getRefreshTokenValiditySeconds();
+    	this.autoApprove = "TRUE";
+    }
 
+	@Override
 	public String getClientId() {
 		return clientId;
+	}
+
+	@Override
+	public Set<String> getResourceIds() {
+		return StringUtils.commaDelimitedListToSet(resourceIds);
+	}
+
+	@Override
+	public boolean isSecretRequired() {
+		return true;
+	}
+
+	@Override
+	public String getClientSecret() {
+		return clientSecret;
+	}
+
+	@Override
+	public boolean isScoped() {
+		return true;
+	}
+
+	@Override
+	public Set<String> getScope() {
+		return StringUtils.commaDelimitedListToSet(scope);
+	}
+
+	@Override
+	public Set<String> getAuthorizedGrantTypes() {
+		return StringUtils.commaDelimitedListToSet(authorizedGrantTypes);
+	}
+
+	@Override
+	public Set<String> getRegisteredRedirectUri() {
+		return StringUtils.commaDelimitedListToSet(webServerRedirectUri);
+	}
+
+	@Override
+	public Collection<GrantedAuthority> getAuthorities() {
+		
+		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+		for (String authority : StringUtils.commaDelimitedListToSet(authorities)) {
+			grantedAuthorities.add(new SimpleGrantedAuthority(authority));
+		}
+		
+		return grantedAuthorities;
+	}
+
+	@Override
+	public Integer getAccessTokenValiditySeconds() {
+		return accessTokenValidity;
+	}
+
+	@Override
+	public Integer getRefreshTokenValiditySeconds() {
+		return refreshTokenValidity;
+	}
+
+	@Override
+	public boolean isAutoApprove(String scope) {
+		return Boolean.parseBoolean(autoApprove);
+	}
+
+	@SuppressWarnings("serial")
+	@Override
+	public Map<String, Object> getAdditionalInformation() {
+		return new HashMap<String, Object>() {
+			{
+				put("info", additionalInformation);
+			}
+		};
 	}
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
 
-	public String getResourceIds() {
-		return resourceIds;
-	}
-
 	public void setResourceIds(String resourceIds) {
 		this.resourceIds = resourceIds;
-	}
-
-	public String getClientSecret() {
-		return clientSecret;
 	}
 
 	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
 	}
 
-	public String getScope() {
-		return scope;
-	}
-
 	public void setScope(String scope) {
 		this.scope = scope;
-	}
-
-	public String getAuthorizedGrantTypes() {
-		return authorizedGrantTypes;
 	}
 
 	public void setAuthorizedGrantTypes(String authorizedGrantTypes) {
 		this.authorizedGrantTypes = authorizedGrantTypes;
 	}
 
-	public String getWebServerRedirectUri() {
-		return webServerRedirectUri;
-	}
-
 	public void setWebServerRedirectUri(String webServerRedirectUri) {
 		this.webServerRedirectUri = webServerRedirectUri;
-	}
-
-	public String getAuthorities() {
-		return authorities;
 	}
 
 	public void setAuthorities(String authorities) {
 		this.authorities = authorities;
 	}
 
-	public Integer getAccessTokenValidity() {
-		return accessTokenValidity;
-	}
-
 	public void setAccessTokenValidity(Integer accessTokenValidity) {
 		this.accessTokenValidity = accessTokenValidity;
-	}
-
-	public Integer getRefreshTokenValidity() {
-		return refreshTokenValidity;
 	}
 
 	public void setRefreshTokenValidity(Integer refreshTokenValidity) {
 		this.refreshTokenValidity = refreshTokenValidity;
 	}
 
-	public String getAdditionalInformation() {
-		return additionalInformation;
-	}
-
 	public void setAdditionalInformation(String additionalInformation) {
 		this.additionalInformation = additionalInformation;
-	}
-
-	public String getAutoApprove() {
-		return autoApprove;
 	}
 
 	public void setAutoApprove(String autoApprove) {
@@ -184,5 +240,5 @@ public class OAuthClientDetails implements Serializable {
 				+ accessTokenValidity + ", refreshTokenValidity="
 				+ refreshTokenValidity + ", additionalInformation="
 				+ additionalInformation + ", autoApprove=" + autoApprove + "]";
-	}        
+	}		
 }

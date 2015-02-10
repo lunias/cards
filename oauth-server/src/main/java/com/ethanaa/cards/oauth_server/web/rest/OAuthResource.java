@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,11 +28,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -41,9 +43,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.ethanaa.cards.common.constant.AuthorityConstants;
+import com.ethanaa.cards.common.constant.ScopeConstants;
+import com.ethanaa.cards.common.web.rest.exception.OAuthClientDetailsNotFoundException;
 import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
 import com.ethanaa.cards.common.web.rest.util.RestUtil;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
+import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
+import com.ethanaa.cards.oauth_server.security.CustomJdbcClientDetailsService;
 import com.ethanaa.cards.oauth_server.service.UserService;
 
 @RestController
@@ -62,22 +69,33 @@ public class OAuthResource implements EnvironmentAware {
 	private ConsumerTokenServices tokenServices;
 	
 	@Inject
-	private ClientDetailsService clientDetailsService;
+	private CustomJdbcClientDetailsService clientDetailsService;
 	
 	@Inject
 	private UserService userService;
+	
+	@Inject
+	OAuthClientDetailsRepository oAuthClientDetailsRepository;
     
     private RelaxedPropertyResolver propertyResolver;	
 	
     private static final Pattern CLIENT_ID_PATT = Pattern.compile("client_id=(.*?)(&|$)");
     private static final Pattern USERNAME_PATT = Pattern.compile("username=(.*?)(&|$)");   
     
+    /**
+     * 
+     * 
+     * @param urlEncodedBody
+     * @param request
+     * @return {@link OAuth2AccessToken} oauth2 authorization token
+     * @throws Exception
+     */
 	@RequestMapping(method = RequestMethod.POST, value = "/token")
 	public ResponseEntity<?> redirectWithAuthorizationHeaders(
 			@RequestBody String urlEncodedBody,
 			HttpServletRequest request) throws Exception {	
 		
-		String client = "";
+		String client = "cards-oauth";
 		
 		Matcher clientIdMatcher = CLIENT_ID_PATT.matcher(urlEncodedBody);
 		if (clientIdMatcher.find()) {
@@ -97,7 +115,7 @@ public class OAuthResource implements EnvironmentAware {
 		}
 		
 		OAuthClientDetails requestedClientDetails = null;
-		for(OAuthClientDetails clientDetails : userService.getUserClients(username)) {
+		for(OAuthClientDetails clientDetails : userService.getUserClientDetails(username)) {
 			if (clientDetails.getClientId().equals(client)) {
 				requestedClientDetails = clientDetails;
 				break;
@@ -143,6 +161,88 @@ public class OAuthResource implements EnvironmentAware {
 		return new ResponseEntity<>(accessTokenResponse.getBody(), accessTokenResponse.getStatusCode());
     }
     
+	/**
+	 * GET all {@link OAuthClientDetails} records
+	 * 
+	 * @return a {@link List} of  {@link OAuthClientDetails} 
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
+	@RequestMapping(method = RequestMethod.GET, value = "/clients")
+	public ResponseEntity<List<OAuthClientDetails>> getOAuthClients() {
+		
+		return new ResponseEntity<>(oAuthClientDetailsRepository.findAll(), HttpStatus.OK);
+	}
+	
+	/**
+	 * GET a specific {@link OAuthClientDetails} record
+	 * 
+	 * @param clientId
+	 * @return {@link OAuthClientDetails}
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")      
+	@RequestMapping(method = RequestMethod.GET, value = "/clients/{clientId}")
+	public ResponseEntity<OAuthClientDetails> getOAuthClient(@PathVariable String clientId) {
+		
+		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
+		if (clientDetails == null) {
+			throw new OAuthClientDetailsNotFoundException(clientId);
+		}
+		
+		return new ResponseEntity<>(clientDetails, HttpStatus.OK);
+	}
+    
+	/**
+	 * PUT a specific {@link OAuthClientDetails} record
+	 * 
+	 * @param clientId
+	 * @param request
+	 * @return {@link OAuthClientDetails}
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")      
+	@RequestMapping(method = RequestMethod.PUT, value = "/clients/{clientId}")    
+    public ResponseEntity<OAuthClientDetails> updateOAuthClient(@PathVariable String clientId, @RequestBody ClientDetails request) {    	    	
+    	
+		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
+		if (clientDetails == null) {
+			throw new OAuthClientDetailsNotFoundException(clientId);
+		}
+		
+//		if (request.getResourceIds() != null) clientDetails.setResourceIds(request.getResourceIds());
+//		if (request.getScope() != null) clientDetails.setScope(request.getScope());
+//		if (request.getAccessTokenValidity() != null) clientDetails.setAccessTokenValidity(request.getAccessTokenValidity());
+//		if (request.getAutoApprove() != null) clientDetails.setAutoApprove(request.getAutoApprove());
+		
+		return new ResponseEntity<>(oAuthClientDetailsRepository.save(clientDetails), HttpStatus.OK);
+    }
+    
+	/**
+	 * DELETE a specific {@link OAuthClientDetails} record
+	 * 
+	 * @param clientId
+	 * @return {@link OAuthClientDetails}
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_DELETE + "')")      
+	@RequestMapping(method = RequestMethod.DELETE, value = "/clients/{clientId}")    
+    public ResponseEntity<?> deleteOAuthClient(@PathVariable String clientId) {    	
+    	
+		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
+		if (clientDetails == null) {
+			throw new OAuthClientDetailsNotFoundException(clientId);
+		}		
+		
+		oAuthClientDetailsRepository.delete(clientDetails);
+		
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }    
+	
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/tokens")
 	public ResponseEntity<Map<String, Object>> getActiveTokens() {
 		
@@ -158,6 +258,13 @@ public class OAuthResource implements EnvironmentAware {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
+	/**
+	 * 
+	 * @param client
+	 * @param username
+	 * @param principal
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/clients/{client}/users/{username}/tokens")
 	public ResponseEntity<Collection<OAuth2AccessToken>> getTokensForAccount(@PathVariable String client, @PathVariable String username, Principal principal) {
 		
@@ -166,6 +273,13 @@ public class OAuthResource implements EnvironmentAware {
 		return new ResponseEntity<>(enhance(tokenStore.findTokensByClientIdAndUserName(client, username)), HttpStatus.OK);		
 	}
 	
+	/**
+	 * 
+	 * @param username
+	 * @param token
+	 * @param principal
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.DELETE, value = "/users/{username}/tokens/{token}")
 	public ResponseEntity<Void> revokeToken(@PathVariable String username, @PathVariable String token, Principal principal) {
 		
@@ -178,6 +292,11 @@ public class OAuthResource implements EnvironmentAware {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param username
+	 * @param principal
+	 */
 	private void checkResourceOwner(String username, Principal principal) {
 		
 		if (principal instanceof OAuth2Authentication) {
@@ -191,6 +310,11 @@ public class OAuthResource implements EnvironmentAware {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param tokens
+	 * @return
+	 */
 	private Collection<OAuth2AccessToken> enhance(Collection<OAuth2AccessToken> tokens) {
 		
 		Collection<OAuth2AccessToken> result = new ArrayList<OAuth2AccessToken>();		

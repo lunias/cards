@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -29,6 +30,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.constant.ResourceConstants;
 import com.ethanaa.cards.oauth_server.security.AjaxLogoutSuccessHandler;
+import com.ethanaa.cards.oauth_server.security.CustomJdbcClientDetailsService;
 import com.ethanaa.cards.oauth_server.security.Http401UnauthorizedEntryPoint;
 
 @Configuration
@@ -150,7 +152,9 @@ public class OAuth2ServerConfiguration {
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         	
-        	clients.jdbc(dataSource);
+        	clients.withClientDetails(customClientDetailsService());
+        	
+//        	clients.jdbc(dataSource);
         	
 //            clients
 //                .inMemory()
@@ -187,6 +191,12 @@ public class OAuth2ServerConfiguration {
 //                		.authorizedGrantTypes("password")
 //                		.secret(propertyResolver.getProperty(GAME_SECRET))
 //                		.accessTokenValiditySeconds(propertyResolver.getProperty(GAME_TOKEN_VALIDITY_SECONDS, Integer.class, 1800));
+        }
+        
+        @Bean
+        public ClientDetailsService customClientDetailsService() {
+        	
+        	return new CustomJdbcClientDetailsService();
         }
 
         @Override

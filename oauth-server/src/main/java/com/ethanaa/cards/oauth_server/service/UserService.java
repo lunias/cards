@@ -103,7 +103,7 @@ public class UserService {
     }
     
     @Transactional(readOnly = true)
-    public Set<OAuthClientDetails> getUserClients(String username) throws UserNotFoundException {
+    public Set<OAuthClientDetails> getUserClientDetails(String username) throws UserNotFoundException {
     	
     	User user = userRepository.findOneByLogin(username);
     	
