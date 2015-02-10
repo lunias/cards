@@ -43,7 +43,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
 import com.ethanaa.cards.common.web.rest.util.RestUtil;
-import com.ethanaa.cards.oauth_server.repository.ClientAccessRepository;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
+import com.ethanaa.cards.oauth_server.service.UserService;
 
 @RestController
 @RequestMapping("/api/oauth")
@@ -64,11 +65,11 @@ public class OAuthResource implements EnvironmentAware {
 	private ClientDetailsService clientDetailsService;
 	
 	@Inject
-	private ClientAccessRepository clientAccessRepo;
+	private UserService userService;
     
     private RelaxedPropertyResolver propertyResolver;	
 	
-    private static final Pattern CLIENT_ID_PATT = Pattern.compile("client_id=cards(.*?)(&|$)");
+    private static final Pattern CLIENT_ID_PATT = Pattern.compile("client_id=(.*?)(&|$)");
     private static final Pattern USERNAME_PATT = Pattern.compile("username=(.*?)(&|$)");   
     
 	@RequestMapping(method = RequestMethod.POST, value = "/token")
@@ -95,17 +96,20 @@ public class OAuthResource implements EnvironmentAware {
 					.body(new InvalidClientException("Could not parse username"));
 		}
 		
-		// check if user has access mapped to the requested client
-		if (clientAccessRepo.findFirstByUsernameAndClient(username, client) == null) {
-			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
-					.body(new InvalidClientException("User '" + username + "' is not authorized for client '" + client + "'"));			
+		OAuthClientDetails requestedClientDetails = null;
+		for(OAuthClientDetails clientDetails : userService.getUserClients(username)) {
+			if (clientDetails.getClientId().equals(client)) {
+				requestedClientDetails = clientDetails;
+				break;
+			}
 		}
 		
-		String clientSecret = propertyResolver.getProperty(client + ".secret");
-		if (clientSecret == null) {
+		if (requestedClientDetails == null) {
 			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
-					.body(new InvalidClientException("Invalid client id"));			
-		}
+					.body(new InvalidClientException("User '" + username + "' is not authorized for client '" + client + "'"));				
+		}		
+		
+		String clientSecret = requestedClientDetails.getClientSecret();
 		
 		URI tokenUri = null;
 		try {
@@ -123,7 +127,7 @@ public class OAuthResource implements EnvironmentAware {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		headers.setAccept(Arrays.asList(new MediaType[] {MediaType.APPLICATION_JSON}));
 		headers.add(HttpHeaders.AUTHORIZATION,
-				"Basic " + Base64.encodeBytes(("cards" + client + ":" + clientSecret).getBytes()));
+				"Basic " + Base64.encodeBytes((client + ":" + clientSecret).getBytes()));
 		
 		RestTemplate rest = new RestTemplate();
 		rest.setErrorHandler(new RestTemplateErrorHandler());

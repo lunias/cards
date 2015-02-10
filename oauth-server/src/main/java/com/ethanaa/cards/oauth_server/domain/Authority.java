@@ -1,4 +1,4 @@
-package com.ethanaa.cards.common.domain;
+package com.ethanaa.cards.oauth_server.domain;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -17,8 +17,10 @@ import java.io.Serializable;
 @Table(name = "T_AUTHORITY")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Authority implements Serializable {
-
-    @NotNull
+	
+	private static final long serialVersionUID = 7227794066654015514L;
+	
+	@NotNull
     @Size(min = 0, max = 50)
     @Id
     @Column(length = 50)

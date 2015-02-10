@@ -35,10 +35,10 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.ethanaa.cards.common.constant.AuthorityConstants;
-import com.ethanaa.cards.common.domain.Authority;
-import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.Application;
+import com.ethanaa.cards.oauth_server.domain.Authority;
+import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.repository.AuthorityRepository;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.service.MailService;

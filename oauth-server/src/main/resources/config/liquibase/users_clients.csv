@@ -1,0 +1,7 @@
+user_id;username;client_id
+3;admin;cards-oauth
+3;admin;cards-web
+3;admin;cards-game
+4;user;cards-web
+4;user;cards-game
+5;user1;cards-web

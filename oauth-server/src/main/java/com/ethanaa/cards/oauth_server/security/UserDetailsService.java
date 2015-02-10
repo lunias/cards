@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ethanaa.cards.common.domain.Authority;
-import com.ethanaa.cards.common.domain.User;
+import com.ethanaa.cards.oauth_server.domain.Authority;
+import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 
 /**

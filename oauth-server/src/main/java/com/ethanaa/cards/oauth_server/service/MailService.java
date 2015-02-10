@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
-import com.ethanaa.cards.common.domain.User;
+import com.ethanaa.cards.oauth_server.domain.User;
 
 /**
  * Service for sending e-mails.

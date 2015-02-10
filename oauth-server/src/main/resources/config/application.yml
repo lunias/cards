@@ -30,16 +30,16 @@ spring:
 authentication:
     clients:
         oauth:
-            clientid: cardsoauth
-            secret: AdminsAreTheBest
+            clientid: cards-oauth
+            secret: oauth-secret
             tokenValidityInSeconds: 1800        
         web:
             clientid: cardsweb
-            secret: mySecretOAuthSecret
+            secret: web-secret
             tokenValidityInSeconds: 1800        
         game:
             clientid: cardsgame
-            secret: mySecretOAuthSecret
+            secret: game-secret
             tokenValidityInSeconds: 1800
 
 swagger:

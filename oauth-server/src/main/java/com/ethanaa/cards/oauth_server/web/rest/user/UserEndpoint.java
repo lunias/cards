@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.codahale.metrics.annotation.Timed;
 import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.constant.ScopeConstants;
-import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.resource.UserResource;
+import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.service.UserService;
 
 /**

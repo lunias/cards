@@ -1,7 +1,5 @@
 package com.ethanaa.cards.oauth_server.config;
 
-import static com.ethanaa.cards.common.constant.ScopeConstants.*;
-
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
@@ -151,41 +149,44 @@ public class OAuth2ServerConfiguration {
 
         @Override
         public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-            clients
-                .inMemory()
-                	.withClient(propertyResolver.getProperty(OAUTH_CLIENTID))
-                		.resourceIds(ResourceConstants.OAUTH_RESOURCE)
-                		.scopes(OAUTH_READ, 
-                				OAUTH_WRITE, 
-                				OAUTH_DELETE)
-                		.autoApprove(true)
-                		.authorities(AuthorityConstants.USER)
-                		.authorizedGrantTypes("password")
-                		.secret(propertyResolver.getProperty(OAUTH_SECRET))
-                		.accessTokenValiditySeconds(propertyResolver.getProperty(OAUTH_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))                
-                .and()
-                	.withClient(propertyResolver.getProperty(WEB_CLIENTID))
-                		.resourceIds(ResourceConstants.WEB_RESOURCE, ResourceConstants.OAUTH_RESOURCE)
-                		.scopes(WEB_READ, 
-                				WEB_WRITE, 
-                				OAUTH_READ, 
-                				OAUTH_WRITE)
-                		.autoApprove(true)
-                		.authorities(AuthorityConstants.USER)
-                		.authorizedGrantTypes("password")
-                		.secret(propertyResolver.getProperty(WEB_SECRET))
-                		.accessTokenValiditySeconds(propertyResolver.getProperty(WEB_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))
-                .and()
-                	.withClient(propertyResolver.getProperty(GAME_CLIENTID))
-                		.resourceIds(ResourceConstants.GAME_RESOURCE, ResourceConstants.OAUTH_RESOURCE)
-                		.scopes(GAME_READ, 
-                				GAME_WRITE, 
-                				OAUTH_READ)
-                		.autoApprove(true)
-                		.authorities(AuthorityConstants.USER)
-                		.authorizedGrantTypes("password")
-                		.secret(propertyResolver.getProperty(GAME_SECRET))
-                		.accessTokenValiditySeconds(propertyResolver.getProperty(GAME_TOKEN_VALIDITY_SECONDS, Integer.class, 1800));
+        	
+        	clients.jdbc(dataSource);
+        	
+//            clients
+//                .inMemory()
+//                	.withClient(propertyResolver.getProperty(OAUTH_CLIENTID))
+//                		.resourceIds(ResourceConstants.OAUTH_RESOURCE)
+//                		.scopes(OAUTH_READ, 
+//                				OAUTH_WRITE, 
+//                				OAUTH_DELETE)
+//                		.autoApprove(true)
+//                		.authorities(AuthorityConstants.USER)
+//                		.authorizedGrantTypes("password")
+//                		.secret(propertyResolver.getProperty(OAUTH_SECRET))
+//                		.accessTokenValiditySeconds(propertyResolver.getProperty(OAUTH_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))                
+//                .and()
+//                	.withClient(propertyResolver.getProperty(WEB_CLIENTID))
+//                		.resourceIds(ResourceConstants.WEB_RESOURCE, ResourceConstants.OAUTH_RESOURCE)
+//                		.scopes(WEB_READ, 
+//                				WEB_WRITE, 
+//                				OAUTH_READ, 
+//                				OAUTH_WRITE)
+//                		.autoApprove(true)
+//                		.authorities(AuthorityConstants.USER)
+//                		.authorizedGrantTypes("password")
+//                		.secret(propertyResolver.getProperty(WEB_SECRET))
+//                		.accessTokenValiditySeconds(propertyResolver.getProperty(WEB_TOKEN_VALIDITY_SECONDS, Integer.class, 1800))
+//                .and()
+//                	.withClient(propertyResolver.getProperty(GAME_CLIENTID))
+//                		.resourceIds(ResourceConstants.GAME_RESOURCE, ResourceConstants.OAUTH_RESOURCE)
+//                		.scopes(GAME_READ, 
+//                				GAME_WRITE, 
+//                				OAUTH_READ)
+//                		.autoApprove(true)
+//                		.authorities(AuthorityConstants.USER)
+//                		.authorizedGrantTypes("password")
+//                		.secret(propertyResolver.getProperty(GAME_SECRET))
+//                		.accessTokenValiditySeconds(propertyResolver.getProperty(GAME_TOKEN_VALIDITY_SECONDS, Integer.class, 1800));
         }
 
         @Override

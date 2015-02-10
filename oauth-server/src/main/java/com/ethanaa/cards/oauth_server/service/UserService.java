@@ -16,12 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ethanaa.cards.common.domain.Authority;
-import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.exception.CurrentUserDeletionException;
 import com.ethanaa.cards.common.web.rest.exception.EmailAlreadyExistsException;
 import com.ethanaa.cards.common.web.rest.exception.UserNotFoundException;
 import com.ethanaa.cards.common.web.rest.resource.UserResource;
+import com.ethanaa.cards.oauth_server.domain.Authority;
+import com.ethanaa.cards.oauth_server.domain.User;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.ethanaa.cards.oauth_server.repository.AuthorityRepository;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.security.SecurityUtils;
@@ -99,6 +100,20 @@ public class UserService {
         currentUser.getAuthorities().size(); // load many-to-many
         
         return currentUser;
+    }
+    
+    @Transactional(readOnly = true)
+    public Set<OAuthClientDetails> getUserClients(String username) throws UserNotFoundException {
+    	
+    	User user = userRepository.findOneByLogin(username);
+    	
+    	if (user == null) {
+    		throw new UserNotFoundException(username);
+    	}
+    	
+    	user.getClientDetails().size();
+    	
+    	return user.getClientDetails();    	    	
     }
     
     public User updateUser(UserResource userResource) throws UserNotFoundException, EmailAlreadyExistsException {

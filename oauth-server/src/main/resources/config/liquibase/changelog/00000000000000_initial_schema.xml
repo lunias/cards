@@ -148,6 +148,7 @@
     
     <!-- Manage the OAuth authentication -->
     <changeSet id="2" author="jhipster">
+    
         <createTable tableName="oauth_client_details">
             <column name="client_id" type="VARCHAR(256)">
                 <constraints nullable="false" primaryKey="true"/>
@@ -161,8 +162,14 @@
             <column name="access_token_validity" type="INT"/>
             <column name="refresh_token_validity" type="INT"/>
             <column name="additional_information" type="VARCHAR(4096)"/>
-            <column name="autoapprove" type="VARCHAR(4096)"/>
+            <column name="autoapprove" type="VARCHAR(256)"/>
         </createTable>
+        
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/oauth_client_details.csv"
+                  separator=";"
+                  tableName="oauth_client_details">
+        </loadData>        
 
         <createTable tableName="oauth_client_token">
             <column name="token_id" type="VARCHAR(256)"/>
@@ -211,6 +218,7 @@
             <column name="status" type="VARCHAR(256)"/>
             <column name="expiresAt" type="timestamp"/>
             <column name="lastModifiedAt" type="timestamp"/>
-        </createTable>
+        </createTable>        
+        
     </changeSet>
 </databaseChangeLog>

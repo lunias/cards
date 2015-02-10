@@ -1,0 +1,4 @@
+client_id;resource_ids;client_secret;scope;authorized_grant_types;web_server_redirect_uri;authorities;access_token_validity;refresh_token_validity;additional_information;autoapprove
+cards-oauth;cards-oauth;oauth-secret;oauth.read,oauth.write,oauth.delete;password;;ROLE_USER;1800;0;NULL;true
+cards-web;cards-web,cards-oauth;web-secret;web.read,web.write,oauth.read,oauth.write;password;;ROLE_USER;1800;0;NULL;true
+cards-game;cards-game,cards-oauth;game-secret;game.read,game.write,oauth.read;password;;ROLE_USER;1800;0;NULL;true

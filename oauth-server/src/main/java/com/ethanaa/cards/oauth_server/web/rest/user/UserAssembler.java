@@ -6,9 +6,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.springframework.stereotype.Component;
 
-import com.ethanaa.cards.common.domain.Authority;
-import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.resource.UserResource;
+import com.ethanaa.cards.oauth_server.domain.Authority;
+import com.ethanaa.cards.oauth_server.domain.User;
 
 @Component
 public class UserAssembler extends ResourceAssemblerSupport<User, UserResource> {

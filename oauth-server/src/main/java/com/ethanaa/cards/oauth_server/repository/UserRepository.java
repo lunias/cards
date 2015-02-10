@@ -5,7 +5,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ethanaa.cards.common.domain.User;
+import com.ethanaa.cards.oauth_server.domain.User;
 
 /**
  * Spring Data JPA repository for the User entity.

@@ -1,4 +1,4 @@
-package com.ethanaa.cards.common.domain;
+package com.ethanaa.cards.oauth_server.domain;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -21,6 +21,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 
+import com.ethanaa.cards.common.domain.AbstractAuditingEntity;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -81,7 +83,22 @@ public class User extends AbstractAuditingEntity implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "authority_name", referencedColumnName = "name")})
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<Authority> authorities = new HashSet<>();
+    
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "T_USER_CLIENT",            
+            joinColumns = {
+            		@JoinColumn(name = "user_id", referencedColumnName = "id"),
+            		@JoinColumn(name = "username", referencedColumnName = "login")
+            },
+            inverseJoinColumns = {@JoinColumn(name = "client_id", referencedColumnName = "client_id")})
+//    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    private Set<OAuthClientDetails> clientDetails = new HashSet<>();    
 
+    public User() {
+	}
+    
     public Long getId() {
         return id;
     }
@@ -160,9 +177,17 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
-    }
+    }    
 
-    @Override
+    public Set<OAuthClientDetails> getClientDetails() {
+		return clientDetails;
+	}
+
+	public void setClientDetails(Set<OAuthClientDetails> clientDetails) {
+		this.clientDetails = clientDetails;
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

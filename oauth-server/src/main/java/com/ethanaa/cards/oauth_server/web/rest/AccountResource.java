@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codahale.metrics.annotation.Timed;
 import com.ethanaa.cards.common.constant.ScopeConstants;
-import com.ethanaa.cards.common.domain.Authority;
-import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.common.web.rest.resource.RegistrationDTO;
 import com.ethanaa.cards.common.web.rest.resource.UserResource;
+import com.ethanaa.cards.oauth_server.domain.Authority;
+import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.security.SecurityUtils;
 import com.ethanaa.cards.oauth_server.service.MailService;

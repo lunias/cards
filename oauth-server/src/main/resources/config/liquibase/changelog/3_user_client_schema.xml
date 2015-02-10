@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="3" author="cards">
+    
+        <createTable tableName="T_USER_CLIENT">
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="varchar(256)">
+                <constraints nullable="false"/>            
+            </column>
+        </createTable>
+        
+        <addPrimaryKey columnNames="user_id, client_id" tableName="T_USER_CLIENT"/>
+        
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="T_USER_CLIENT"
+                                 constraintName="fk_client_user_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="T_USER" />
+                                 
+        <addForeignKeyConstraint baseColumnNames="username"
+                                 baseTableName="T_USER_CLIENT"
+                                 constraintName="fk_client_user_username"
+                                 referencedColumnNames="login"
+                                 referencedTableName="T_USER" />                                         
+        
+        <addForeignKeyConstraint baseColumnNames="client_id" 
+        						 baseTableName="T_USER_CLIENT"
+								 constraintName="fk_user_client_id" 
+								 referencedColumnNames="client_id"
+								 referencedTableName="oauth_client_details" />
+
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/users_clients.csv"
+                  separator=";"
+                  tableName="T_USER_CLIENT">
+        </loadData>
+    </changeSet>    
+</databaseChangeLog>

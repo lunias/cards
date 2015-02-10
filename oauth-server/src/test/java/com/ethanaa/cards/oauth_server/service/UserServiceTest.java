@@ -15,8 +15,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ethanaa.cards.common.domain.User;
 import com.ethanaa.cards.oauth_server.Application;
+import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
 import com.ethanaa.cards.oauth_server.service.UserService;
 

@@ -10,27 +10,23 @@
 
 	<defaultCache eternal="false" overflowToDisk="false" />
 
-	<cache name="com.ethanaa.cards.common.domain.User"
+	<cache name="com.ethanaa.cards.oauth_server.domain.User"
 		timeToLiveSeconds="3600">
 	</cache>
 
-	<cache name="com.ethanaa.cards.common.domain.Authority"
+	<cache name="com.ethanaa.cards.oauth_server.domain.Authority"
+		timeToLiveSeconds="3600">
+	</cache>
+	
+	<cache name="com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails"
+		timeToLiveSeconds="3600">
+	</cache>	
+
+	<cache name="com.ethanaa.cards.oauth_server.domain.User.authorities"
 		timeToLiveSeconds="3600">
 	</cache>
 
-	<cache name="com.ethanaa.cards.common.domain.User.authorities"
-		timeToLiveSeconds="3600">
-	</cache>
-
-	<cache name="com.ethanaa.cards.common.domain.PersistentToken"
-		timeToLiveSeconds="3600">
-	</cache>
-
-	<cache name="com.ethanaa.cards.common.domain.User.persistentTokens"
-		timeToLiveSeconds="3600">
-	</cache>
-
-	<cache name="com.ethanaa.cards.oauth_server.domain.ClientAccess"
+	<cache name="com.ethanaa.cards.oauth_server.domain.User.clientDetails"
 		timeToLiveSeconds="3600">
 	</cache>
 	
