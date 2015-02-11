@@ -1,5 +1,7 @@
 package com.ethanaa.cards.oauth_server.web.rest.user;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
@@ -28,6 +30,8 @@ import com.ethanaa.cards.common.web.rest.resource.UserResource;
 import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.ethanaa.cards.oauth_server.service.UserService;
+import com.ethanaa.cards.oauth_server.web.rest.oauth.OAuthClientDetailsAssembler;
+import com.ethanaa.cards.oauth_server.web.rest.oauth.OAuthClientDetailsResource;
 
 /**
  * REST controller for managing users.
@@ -43,6 +47,9 @@ public class UserEndpoint {
     
     @Inject
     private UserAssembler userAssembler;
+    
+    @Inject
+    private OAuthClientDetailsAssembler oauthClientDetailsAssembler;
 
     @RequestMapping(method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -124,8 +131,24 @@ public class UserEndpoint {
     @Timed
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")       
-    public ResponseEntity<Set<OAuthClientDetails>> getClientDetails(@PathVariable String login) {
+    public ResponseEntity<List<OAuthClientDetailsResource>> getClientDetails(@PathVariable String login) {
     	
-        return new ResponseEntity<>(userService.getUserClientDetails(login), HttpStatus.OK);    	
+    	Set<OAuthClientDetails> clientDetails = userService.getUserClientDetails(login);    	    	
+    	
+        return new ResponseEntity<>(oauthClientDetailsAssembler.toResources(clientDetails), HttpStatus.OK);    	
+    }
+    
+    @RequestMapping(value = "/{login}/clientDetails",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")       
+    public ResponseEntity<List<OAuthClientDetailsResource>> postClientDetails(@PathVariable String login, @RequestBody OAuthClientDetailsResource request) {
+    	
+    	SimpleEntry<List<OAuthClientDetails>, Boolean> clientDetails = userService.addOrCreateUserClientDetails(login, request);
+    	
+    	return new ResponseEntity<>(oauthClientDetailsAssembler.toResources(clientDetails.getKey()),
+    			clientDetails.getValue() ? HttpStatus.CREATED : HttpStatus.OK);
     }
 }

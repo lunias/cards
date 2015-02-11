@@ -1,5 +1,7 @@
 package com.ethanaa.cards.oauth_server.service;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,8 +27,10 @@ import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.ethanaa.cards.oauth_server.repository.AuthorityRepository;
 import com.ethanaa.cards.oauth_server.repository.UserRepository;
+import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
 import com.ethanaa.cards.oauth_server.security.SecurityUtils;
 import com.ethanaa.cards.oauth_server.service.util.RandomUtil;
+import com.ethanaa.cards.oauth_server.web.rest.oauth.OAuthClientDetailsResource;
 
 /**
  * Service class for managing users.
@@ -44,7 +48,10 @@ public class UserService {
     private UserRepository userRepository;
 
     @Inject
-    private AuthorityRepository authorityRepository;        
+    private AuthorityRepository authorityRepository;
+    
+    @Inject
+    private OAuthClientDetailsRepository oauthClientDetailsRepository;
     
     @Transactional(readOnly = true)    
     public Page<User> getUsersWithAuthorities(Pageable pageable) {
@@ -114,6 +121,27 @@ public class UserService {
     	user.getClientDetails().size();
     	
     	return user.getClientDetails();    	    	
+    }
+    
+    public SimpleEntry<List<OAuthClientDetails>, Boolean> addOrCreateUserClientDetails(String username, OAuthClientDetailsResource resource) throws UserNotFoundException {
+    	
+    	User user = userRepository.findOneByLogin(username);
+    	
+    	if (user == null) {
+    		throw new UserNotFoundException(username);
+    	}
+    	
+    	OAuthClientDetails existingClient = oauthClientDetailsRepository.findOne(resource.getClientId());
+    	
+    	if (existingClient == null) {    		
+    		
+    		existingClient = oauthClientDetailsRepository.save(new OAuthClientDetails(resource));    		
+    	}
+    		
+    	user.getClientDetails().add(existingClient);
+    	// TODO save user?
+    	
+    	return new SimpleEntry<List<OAuthClientDetails>, Boolean>(new ArrayList<>(user.getClientDetails()), false);
     }
     
     public User updateUser(UserResource userResource) throws UserNotFoundException, EmailAlreadyExistsException {

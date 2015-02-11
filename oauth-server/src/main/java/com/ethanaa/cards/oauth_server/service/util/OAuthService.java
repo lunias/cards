@@ -1,14 +1,20 @@
 package com.ethanaa.cards.oauth_server.service.util;
 
+import java.util.List;
+
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ethanaa.cards.common.web.rest.exception.OAuthClientDetailsNotFoundException;
 import com.ethanaa.cards.oauth_server.domain.User;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthResource;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthScope;
 import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
+import com.ethanaa.cards.oauth_server.repository.oauth.OAuthResourceRepository;
+import com.ethanaa.cards.oauth_server.repository.oauth.OAuthScopeRepository;
 
 @Service
 @Transactional
@@ -16,6 +22,24 @@ public class OAuthService {
 
 	@Inject
 	private OAuthClientDetailsRepository oAuthClientDetailsRepository;
+	
+	@Inject
+	private OAuthResourceRepository oAuthResourceRepository;
+	
+	@Inject
+	private OAuthScopeRepository oAuthScopeRepository;
+	
+    @Transactional(readOnly = true)
+	public List<OAuthResource> getOAuthResources() {
+		
+		return oAuthResourceRepository.findAll();
+	}
+    
+    @Transactional(readOnly = true)
+    public List<OAuthScope> getOAuthScopes() {
+    	
+    	return oAuthScopeRepository.findAll();
+    }
 	
 	public void deleteOAuthClientDetails(String clientId) throws OAuthClientDetailsNotFoundException {
 		
@@ -33,6 +57,6 @@ public class OAuthService {
 		}
 		
 		oAuthClientDetailsRepository.delete(clientDetails);
-	}
+	}		
 	
 }

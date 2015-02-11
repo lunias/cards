@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import com.ethanaa.cards.oauth_server.domain.Authority;
 import com.ethanaa.cards.oauth_server.domain.User;
+import com.ethanaa.cards.oauth_server.web.rest.oauth.OAuthClientDetailsResource;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -111,7 +112,7 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
     	
     	Set<String> resourceIds = clientDetails.getResourceIds();
     	for (String resourceId : resourceIds) {
-    		resources.add(new OAuthResource(resourceId));
+    		this.resources.add(new OAuthResource(resourceId));
     	}
     	
     	Set<String> scopes = clientDetails.getScope();
@@ -123,7 +124,22 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
     	for (GrantedAuthority authority : authorities) {
     		this.authorities.add(new Authority(authority));
     	}
-    }        
+    }
+    
+    public OAuthClientDetails(OAuthClientDetailsResource resource) {
+    	
+    	this.clientId = resource.getClientId();
+    	this.clientSecret = "default-secret"; // TODO random secret?
+    	this.authorizedGrantTypes = StringUtils.collectionToCommaDelimitedString(resource.getAuthorizedGrantTypes());
+    	this.webServerRedirectUri = StringUtils.collectionToCommaDelimitedString(resource.getRedirectUrls());
+    	this.accessTokenValidity = resource.getAccessTokenLifeSeconds();
+    	this.refreshTokenValidity = resource.getRefreshTokenLifeSeconds();
+    	this.autoApprove = Boolean.toString(resource.getAutoApprove());
+    	
+    	resources.addAll(resource.getResources());
+    	scopes.addAll(resource.getScopes());
+    	authorities.addAll(resource.getAuthorities());    	
+    }
 
 	@Override
 	public String getClientId() {

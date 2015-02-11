@@ -50,6 +50,8 @@ import com.ethanaa.cards.common.web.rest.exception.OAuthClientDetailsNotFoundExc
 import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
 import com.ethanaa.cards.common.web.rest.util.RestUtil;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthResource;
+import com.ethanaa.cards.oauth_server.domain.oauth.OAuthScope;
 import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
 import com.ethanaa.cards.oauth_server.security.CustomJpaClientDetailsService;
 import com.ethanaa.cards.oauth_server.service.UserService;
@@ -169,6 +171,32 @@ public class OAuthEndpoint implements EnvironmentAware {
 		return new ResponseEntity<>(accessTokenResponse.getBody(), accessTokenResponse.getStatusCode());
     }
     
+	/**
+	 * GET all {@link OAuthResource} records
+	 * 
+	 * @return a {@link List} of  {@link OAuthResource} 
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
+	@RequestMapping(method = RequestMethod.GET, value = "/resources")	
+	public ResponseEntity<List<OAuthResource>> getOAuthResources() {
+		
+    	return new ResponseEntity<>(oauthService.getOAuthResources(), HttpStatus.OK);
+	}
+    
+	/**
+	 * GET all {@link OAuthScope} records
+	 * 
+	 * @return a {@link List} of  {@link OAuthScope} 
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
+	@RequestMapping(method = RequestMethod.GET, value = "/scopes")	
+	public ResponseEntity<List<OAuthScope>> getOAuthScopes() {
+		
+    	return new ResponseEntity<>(oauthService.getOAuthScopes(), HttpStatus.OK);
+	}    
+	
 	/**
 	 * GET all {@link OAuthClientDetails} records
 	 * 
