@@ -1,7 +1,7 @@
-user_id;username;client_id
-3;admin;cards-oauth
-3;admin;cards-web
-3;admin;cards-game
-4;user;cards-web
-4;user;cards-game
-5;user1;cards-web
+user_id;client_id
+3;cards-oauth
+3;cards-web
+3;cards-game
+4;cards-web
+4;cards-game
+5;cards-web

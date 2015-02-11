@@ -1,14 +1,19 @@
 package com.ethanaa.cards.oauth_server.domain;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import java.io.Serializable;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.security.core.GrantedAuthority;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * An authority (a security role) used by Spring Security.
@@ -16,7 +21,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "T_AUTHORITY")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Authority implements Serializable {
+public class Authority implements GrantedAuthority, Serializable {
 	
 	private static final long serialVersionUID = 7227794066654015514L;
 	
@@ -33,6 +38,19 @@ public class Authority implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+    
+    @JsonIgnore
+	@Override
+	public String getAuthority() {
+		return name;
+	} 
+	
+	public Authority(GrantedAuthority grantedAuthority) {
+		this.name = grantedAuthority.getAuthority();
+	}
+	
+	public Authority() {
+	}
 
     @Override
     public boolean equals(Object o) {

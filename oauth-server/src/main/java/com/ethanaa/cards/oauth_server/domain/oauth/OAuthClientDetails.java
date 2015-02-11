@@ -1,16 +1,20 @@
 package com.ethanaa.cards.oauth_server.domain.oauth;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -18,9 +22,12 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.util.StringUtils;
+
+import com.ethanaa.cards.oauth_server.domain.Authority;
+import com.ethanaa.cards.oauth_server.domain.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "oauth_client_details")
@@ -33,25 +40,16 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
     @Size(min = 0, max = 256)
     @Id
     @Column(name = "client_id", length = 256)
-	private String clientId;
-    
-    @Column(name = "resource_ids")
-    private String resourceIds;
+	private String clientId;    
     
     @Column(name = "client_secret")
-    private String clientSecret;
-    
-    @Column(name = "scope")
-    private String scope;
+    private String clientSecret;    
     
     @Column(name = "authorized_grant_types")
     private String authorizedGrantTypes;
     
     @Column(name = "web_server_redirect_uri")
-    private String webServerRedirectUri;
-    
-    @Column(name = "authorities")
-    private String authorities;
+    private String webServerRedirectUri;    
     
     @Column(name = "access_token_validity")
     private Integer accessTokenValidity;
@@ -67,31 +65,69 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
     @Column(name = "autoapprove")
     private String autoApprove;
 
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "oauth_client_resource",
+            joinColumns = {@JoinColumn(name = "client_id", referencedColumnName = "client_id")},
+            inverseJoinColumns = {@JoinColumn(name = "resource_id", referencedColumnName = "resource_id")})
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    private Set<OAuthResource> resources = new HashSet<>();
+        
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "oauth_client_scope",
+            joinColumns = {@JoinColumn(name = "client_id", referencedColumnName = "client_id")},
+            inverseJoinColumns = {@JoinColumn(name = "scope_name", referencedColumnName = "scope")})
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)    
+    private Set<OAuthScope> scopes = new HashSet<>();       
+    
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "oauth_client_authority",
+            joinColumns = {@JoinColumn(name = "client_id", referencedColumnName = "client_id")},
+            inverseJoinColumns = {@JoinColumn(name = "authority_name", referencedColumnName = "name")})
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)      
+    private Set<Authority> authorities = new HashSet<>();
+    
+    @JsonIgnore
+    @ManyToMany(mappedBy = "clientDetails")
+    private Set<User> usersThatCanAccess;    
+    
     public OAuthClientDetails() {
 	}
     
     public OAuthClientDetails(ClientDetails clientDetails) {
     	
     	this.clientId = clientDetails.getClientId();
-    	this.resourceIds = StringUtils.collectionToCommaDelimitedString(clientDetails.getResourceIds());
     	this.clientSecret = clientDetails.getClientSecret();
-    	this.scope = StringUtils.collectionToCommaDelimitedString(clientDetails.getScope());
     	this.authorizedGrantTypes = StringUtils.collectionToCommaDelimitedString(clientDetails.getAuthorizedGrantTypes());
     	this.webServerRedirectUri = StringUtils.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri());
-    	this.authorities = StringUtils.collectionToCommaDelimitedString(clientDetails.getAuthorities());
     	this.accessTokenValidity = clientDetails.getAccessTokenValiditySeconds();
     	this.refreshTokenValidity = clientDetails.getRefreshTokenValiditySeconds();
     	this.autoApprove = "TRUE";
-    }
+    	
+    	Set<String> resourceIds = clientDetails.getResourceIds();
+    	for (String resourceId : resourceIds) {
+    		resources.add(new OAuthResource(resourceId));
+    	}
+    	
+    	Set<String> scopes = clientDetails.getScope();
+    	for (String scope : scopes) {
+    		this.scopes.add(new OAuthScope(scope));
+    	}
+    	
+    	Collection<GrantedAuthority> authorities = clientDetails.getAuthorities();
+    	for (GrantedAuthority authority : authorities) {
+    		this.authorities.add(new Authority(authority));
+    	}
+    }        
 
 	@Override
 	public String getClientId() {
 		return clientId;
-	}
-
-	@Override
-	public Set<String> getResourceIds() {
-		return StringUtils.commaDelimitedListToSet(resourceIds);
 	}
 
 	@Override
@@ -110,11 +146,6 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
 	}
 
 	@Override
-	public Set<String> getScope() {
-		return StringUtils.commaDelimitedListToSet(scope);
-	}
-
-	@Override
 	public Set<String> getAuthorizedGrantTypes() {
 		return StringUtils.commaDelimitedListToSet(authorizedGrantTypes);
 	}
@@ -122,17 +153,6 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
 	@Override
 	public Set<String> getRegisteredRedirectUri() {
 		return StringUtils.commaDelimitedListToSet(webServerRedirectUri);
-	}
-
-	@Override
-	public Collection<GrantedAuthority> getAuthorities() {
-		
-		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-		for (String authority : StringUtils.commaDelimitedListToSet(authorities)) {
-			grantedAuthorities.add(new SimpleGrantedAuthority(authority));
-		}
-		
-		return grantedAuthorities;
 	}
 
 	@Override
@@ -159,21 +179,57 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
 			}
 		};
 	}
+	
+	@Override
+	public Set<String> getResourceIds() {
+
+		Set<String> resourceStrings = new HashSet<>();
+		for (OAuthResource resource : resources) {
+			resourceStrings.add(resource.getResourceId());
+		}
+		
+		return resourceStrings;
+	}
+
+	@Override
+	public Set<String> getScope() {
+		
+		Set<String> scopeStrings = new HashSet<>();
+		for (OAuthScope scope : scopes) {
+			scopeStrings.add(scope.getScope());
+		}
+		
+		return scopeStrings;
+	}
+
+	@Override
+	public Collection<GrantedAuthority> getAuthorities() {
+
+		return new HashSet<GrantedAuthority>(authorities);	
+	}		
+
+	public Set<OAuthResource> getResources() {
+		return resources;
+	}
+
+	public Set<OAuthScope> getScopes() {
+		return scopes;
+	}		
+
+	public Set<User> getUsersThatCanAccess() {
+		return usersThatCanAccess;
+	}
+
+	public void setUsersThatCanAccess(Set<User> usersThatCanAcess) {
+		this.usersThatCanAccess = usersThatCanAcess;
+	}
 
 	public void setClientId(String clientId) {
 		this.clientId = clientId;
 	}
 
-	public void setResourceIds(String resourceIds) {
-		this.resourceIds = resourceIds;
-	}
-
 	public void setClientSecret(String clientSecret) {
 		this.clientSecret = clientSecret;
-	}
-
-	public void setScope(String scope) {
-		this.scope = scope;
 	}
 
 	public void setAuthorizedGrantTypes(String authorizedGrantTypes) {
@@ -182,10 +238,6 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
 
 	public void setWebServerRedirectUri(String webServerRedirectUri) {
 		this.webServerRedirectUri = webServerRedirectUri;
-	}
-
-	public void setAuthorities(String authorities) {
-		this.authorities = authorities;
 	}
 
 	public void setAccessTokenValidity(Integer accessTokenValidity) {
@@ -202,6 +254,18 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
 
 	public void setAutoApprove(String autoApprove) {
 		this.autoApprove = autoApprove;
+	}		
+	
+	public void setResources(Set<OAuthResource> resources) {
+		this.resources = resources;
+	}
+
+	public void setScopes(Set<OAuthScope> scopes) {
+		this.scopes = scopes;
+	}
+
+	public void setAuthorities(Set<Authority> authorities) {
+		this.authorities = authorities;
 	}
 
 	@Override
@@ -232,13 +296,12 @@ public class OAuthClientDetails implements ClientDetails, Serializable {
 
 	@Override
 	public String toString() {
-		return "OAuthClientDetails [clientId=" + clientId + ", resourceIds="
-				+ resourceIds + ", clientSecret=" + clientSecret + ", scope="
-				+ scope + ", authorizedGrantTypes=" + authorizedGrantTypes
-				+ ", webServerRedirectUri=" + webServerRedirectUri
-				+ ", authorities=" + authorities + ", accessTokenValidity="
+		return "OAuthClientDetails [clientId=" + clientId + ", clientSecret="
+				+ clientSecret + ", authorizedGrantTypes="
+				+ authorizedGrantTypes + ", webServerRedirectUri="
+				+ webServerRedirectUri + ", accessTokenValidity="
 				+ accessTokenValidity + ", refreshTokenValidity="
 				+ refreshTokenValidity + ", additionalInformation="
 				+ additionalInformation + ", autoApprove=" + autoApprove + "]";
-	}		
+	}	
 }

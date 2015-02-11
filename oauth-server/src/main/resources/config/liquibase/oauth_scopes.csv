@@ -1,0 +1,10 @@
+scope
+oauth.read
+oauth.write
+oauth.delete
+web.read
+web.write
+web.delete
+game.read
+game.write
+game.delete

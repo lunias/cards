@@ -30,7 +30,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.ethanaa.cards.common.constant.AuthorityConstants;
 import com.ethanaa.cards.common.constant.ResourceConstants;
 import com.ethanaa.cards.oauth_server.security.AjaxLogoutSuccessHandler;
-import com.ethanaa.cards.oauth_server.security.CustomJdbcClientDetailsService;
+import com.ethanaa.cards.oauth_server.security.CustomJpaClientDetailsService;
 import com.ethanaa.cards.oauth_server.security.Http401UnauthorizedEntryPoint;
 
 @Configuration
@@ -196,7 +196,7 @@ public class OAuth2ServerConfiguration {
         @Bean
         public ClientDetailsService customClientDetailsService() {
         	
-        	return new CustomJdbcClientDetailsService();
+        	return new CustomJpaClientDetailsService();
         }
 
         @Override

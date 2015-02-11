@@ -1,0 +1,6 @@
+client_id;resource_id
+cards-oauth;cards-oauth
+cards-web;cards-web
+cards-web;cards-oauth
+cards-game;cards-game
+cards-game;cards-oauth

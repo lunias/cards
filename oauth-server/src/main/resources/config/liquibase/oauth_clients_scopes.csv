@@ -1,0 +1,11 @@
+client_id;scope_name
+cards-oauth;oauth.read
+cards-oauth;oauth.write
+cards-oauth;oauth.delete
+cards-web;web.read
+cards-web;web.write
+cards-web;oauth.read
+cards-web;oauth.write
+cards-game;game.read
+cards-game;game.write
+cards-game;oauth.read

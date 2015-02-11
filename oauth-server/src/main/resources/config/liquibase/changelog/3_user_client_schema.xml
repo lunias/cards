@@ -7,10 +7,7 @@
     <changeSet id="3" author="cards">
     
         <createTable tableName="T_USER_CLIENT">
-            <column name="user_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="username" type="varchar(50)">
+            <column name="user_id" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="client_id" type="varchar(256)">
@@ -18,18 +15,12 @@
             </column>
         </createTable>
         
-        <addPrimaryKey columnNames="user_id, client_id" tableName="T_USER_CLIENT"/>
-        
+        <addPrimaryKey columnNames="user_id, client_id" tableName="T_USER_CLIENT"/>        
+                                 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="T_USER_CLIENT"
                                  constraintName="fk_client_user_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="T_USER" />
-                                 
-        <addForeignKeyConstraint baseColumnNames="username"
-                                 baseTableName="T_USER_CLIENT"
-                                 constraintName="fk_client_user_username"
-                                 referencedColumnNames="login"
                                  referencedTableName="T_USER" />                                         
         
         <addForeignKeyConstraint baseColumnNames="client_id" 

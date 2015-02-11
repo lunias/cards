@@ -153,12 +153,9 @@
             <column name="client_id" type="VARCHAR(256)">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="resource_ids" type="VARCHAR(256)"/>
             <column name="client_secret" type="VARCHAR(256)"/>
-            <column name="scope" type="VARCHAR(256)"/>
             <column name="authorized_grant_types" type="VARCHAR(256)"/>
             <column name="web_server_redirect_uri" type="VARCHAR(256)"/>
-            <column name="authorities" type="VARCHAR(256)"/>
             <column name="access_token_validity" type="INT"/>
             <column name="refresh_token_validity" type="INT"/>
             <column name="additional_information" type="VARCHAR(4096)"/>
@@ -169,7 +166,119 @@
                   file="config/liquibase/oauth_client_details.csv"
                   separator=";"
                   tableName="oauth_client_details">
+        </loadData>  
+        
+        <createTable tableName="oauth_resource">
+            <column name="resource_id" type="VARCHAR(256)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uri" type="VARCHAR(256)"/>            
+        </createTable>
+        
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/oauth_resources.csv"
+                  separator=";"
+                  tableName="oauth_resource">
+        </loadData>         
+        
+        <createTable tableName="oauth_scope">
+            <column name="scope" type="VARCHAR(256)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+        
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/oauth_scopes.csv"
+                  separator=";"
+                  tableName="oauth_scope">
         </loadData>        
+                             
+        <createTable tableName="oauth_client_resource">
+            <column name="client_id" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_id" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addPrimaryKey columnNames="client_id, resource_id" tableName="oauth_client_resource"/>
+
+        <addForeignKeyConstraint baseColumnNames="resource_id"
+                                 baseTableName="oauth_client_resource"
+                                 constraintName="fk_client_resource_id"
+                                 referencedColumnNames="resource_id"
+                                 referencedTableName="oauth_resource"/>
+
+        <addForeignKeyConstraint baseColumnNames="client_id"
+                                 baseTableName="oauth_client_resource"
+                                 constraintName="fk_resource_client_id"
+                                 referencedColumnNames="client_id"
+                                 referencedTableName="oauth_client_details"/>
+                                 
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/oauth_clients_resources.csv"
+                  separator=";"
+                  tableName="oauth_client_resource">
+        </loadData>                                         
+        
+        <createTable tableName="oauth_client_scope">
+            <column name="client_id" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scope_name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addPrimaryKey columnNames="client_id, scope_name" tableName="oauth_client_scope"/>
+
+        <addForeignKeyConstraint baseColumnNames="scope_name"
+                                 baseTableName="oauth_client_scope"
+                                 constraintName="fk_client_scope_id"
+                                 referencedColumnNames="scope"
+                                 referencedTableName="oauth_scope"/>
+
+        <addForeignKeyConstraint baseColumnNames="client_id"
+                                 baseTableName="oauth_client_scope"
+                                 constraintName="fk_scope_client_id"
+                                 referencedColumnNames="client_id"
+                                 referencedTableName="oauth_client_details"/>
+                                 
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/oauth_clients_scopes.csv"
+                  separator=";"
+                  tableName="oauth_client_scope">
+        </loadData>
+        
+       	<createTable tableName="oauth_client_authority">
+            <column name="client_id" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authority_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="client_id, authority_name" tableName="oauth_client_authority"/>
+
+        <addForeignKeyConstraint baseColumnNames="authority_name"
+                                 baseTableName="oauth_client_authority"
+                                 constraintName="fk_client_authority_name"
+                                 referencedColumnNames="name"
+                                 referencedTableName="T_AUTHORITY"/>
+
+        <addForeignKeyConstraint baseColumnNames="client_id"
+                                 baseTableName="oauth_client_authority"
+                                 constraintName="fk_authority_client_id"
+                                 referencedColumnNames="client_id"
+                                 referencedTableName="oauth_client_details"/>
+                                 
+        <loadData encoding="UTF-8"
+                  file="config/liquibase/oauth_clients_authorities.csv"
+                  separator=";"
+                  tableName="oauth_client_authority">
+        </loadData>                                 
 
         <createTable tableName="oauth_client_token">
             <column name="token_id" type="VARCHAR(256)"/>

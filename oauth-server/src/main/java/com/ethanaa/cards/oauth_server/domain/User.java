@@ -88,12 +88,8 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @ManyToMany
     @JoinTable(
             name = "T_USER_CLIENT",            
-            joinColumns = {
-            		@JoinColumn(name = "user_id", referencedColumnName = "id"),
-            		@JoinColumn(name = "username", referencedColumnName = "login")
-            },
+            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "client_id", referencedColumnName = "client_id")})
-//    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<OAuthClientDetails> clientDetails = new HashSet<>();    
 
     public User() {

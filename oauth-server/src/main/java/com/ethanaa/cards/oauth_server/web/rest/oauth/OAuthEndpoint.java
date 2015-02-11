@@ -1,4 +1,4 @@
-package com.ethanaa.cards.oauth_server.web.rest;
+package com.ethanaa.cards.oauth_server.web.rest.oauth;
 
 import java.net.URI;
 import java.security.Principal;
@@ -36,6 +36,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,17 +51,18 @@ import com.ethanaa.cards.common.web.rest.interop.RestTemplateErrorHandler;
 import com.ethanaa.cards.common.web.rest.util.RestUtil;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
-import com.ethanaa.cards.oauth_server.security.CustomJdbcClientDetailsService;
+import com.ethanaa.cards.oauth_server.security.CustomJpaClientDetailsService;
 import com.ethanaa.cards.oauth_server.service.UserService;
+import com.ethanaa.cards.oauth_server.service.util.OAuthService;
 
 @RestController
 @RequestMapping("/api/oauth")
-public class OAuthResource implements EnvironmentAware {
+public class OAuthEndpoint implements EnvironmentAware {
 
     private static final String ENV_OAUTH = "authentication.clients.";
     private static final String PROP_CLIENTID = "clientid";	
 	
-	private final Logger log = LoggerFactory.getLogger(OAuthResource.class);
+	private final Logger log = LoggerFactory.getLogger(OAuthEndpoint.class);
 
 	@Inject
 	private TokenStore tokenStore;
@@ -69,13 +71,19 @@ public class OAuthResource implements EnvironmentAware {
 	private ConsumerTokenServices tokenServices;
 	
 	@Inject
-	private CustomJdbcClientDetailsService clientDetailsService;
+	private CustomJpaClientDetailsService clientDetailsService;
 	
 	@Inject
 	private UserService userService;
 	
 	@Inject
-	OAuthClientDetailsRepository oAuthClientDetailsRepository;
+	private OAuthClientDetailsRepository oAuthClientDetailsRepository;
+	
+	@Inject
+	private OAuthService oauthService;
+	
+	@Inject
+	private OAuthClientDetailsAssembler oauthClientDetailsAssembler;
     
     private RelaxedPropertyResolver propertyResolver;	
 	
@@ -136,7 +144,7 @@ public class OAuthResource implements EnvironmentAware {
 					request.getServerName(), 
 					request.getServerPort(), 
 					"/oauth/token",
-					urlEncodedBody, null);
+					null, null);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("Could not parse request body");				
 		}
@@ -169,9 +177,11 @@ public class OAuthResource implements EnvironmentAware {
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
 	@RequestMapping(method = RequestMethod.GET, value = "/clients")
-	public ResponseEntity<List<OAuthClientDetails>> getOAuthClients() {
+	public ResponseEntity<List<OAuthClientDetailsResource>> getOAuthClients() {
 		
-		return new ResponseEntity<>(oAuthClientDetailsRepository.findAll(), HttpStatus.OK);
+    	List<OAuthClientDetails> clients = oAuthClientDetailsRepository.findAll();    	
+    	
+		return new ResponseEntity<>(oauthClientDetailsAssembler.toResources(clients), HttpStatus.OK);
 	}
 	
 	/**
@@ -183,14 +193,14 @@ public class OAuthResource implements EnvironmentAware {
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")      
 	@RequestMapping(method = RequestMethod.GET, value = "/clients/{clientId}")
-	public ResponseEntity<OAuthClientDetails> getOAuthClient(@PathVariable String clientId) {
+	public ResponseEntity<OAuthClientDetailsResource> getOAuthClient(@PathVariable String clientId) {
 		
 		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
 		if (clientDetails == null) {
 			throw new OAuthClientDetailsNotFoundException(clientId);
 		}
 		
-		return new ResponseEntity<>(clientDetails, HttpStatus.OK);
+		return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(clientDetails), HttpStatus.OK);
 	}
     
 	/**
@@ -203,19 +213,27 @@ public class OAuthResource implements EnvironmentAware {
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")      
 	@RequestMapping(method = RequestMethod.PUT, value = "/clients/{clientId}")    
-    public ResponseEntity<OAuthClientDetails> updateOAuthClient(@PathVariable String clientId, @RequestBody ClientDetails request) {    	    	
+    public ResponseEntity<OAuthClientDetailsResource> updateOAuthClient(@PathVariable String clientId, @RequestBody OAuthClientDetailsResource request) {    	    	
     	
 		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
 		if (clientDetails == null) {
 			throw new OAuthClientDetailsNotFoundException(clientId);
 		}
 		
-//		if (request.getResourceIds() != null) clientDetails.setResourceIds(request.getResourceIds());
-//		if (request.getScope() != null) clientDetails.setScope(request.getScope());
-//		if (request.getAccessTokenValidity() != null) clientDetails.setAccessTokenValidity(request.getAccessTokenValidity());
-//		if (request.getAutoApprove() != null) clientDetails.setAutoApprove(request.getAutoApprove());
+		clientDetails.setClientId(request.getClientId());
+		clientDetails.setAuthorizedGrantTypes(StringUtils.collectionToCommaDelimitedString(request.getAuthorizedGrantTypes()));
+		clientDetails.setWebServerRedirectUri(StringUtils.collectionToCommaDelimitedString(request.getRedirectUrls()));
+		clientDetails.setAccessTokenValidity(request.getAccessTokenLifeSeconds());
+		clientDetails.setRefreshTokenValidity(request.getRefreshTokenLifeSeconds());
+		clientDetails.setAdditionalInformation(request.getAdditionalInfo());
+		clientDetails.setAutoApprove(Boolean.toString(request.getAutoApprove()));
+		clientDetails.setResources(request.getResources());
+		clientDetails.setScopes(request.getScopes());
+		clientDetails.setAuthorities(request.getAuthorities());
 		
-		return new ResponseEntity<>(oAuthClientDetailsRepository.save(clientDetails), HttpStatus.OK);
+		OAuthClientDetails updatedClientDetails = oAuthClientDetailsRepository.save(clientDetails);
+		
+		return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(updatedClientDetails), HttpStatus.OK);		
     }
     
 	/**
@@ -227,14 +245,9 @@ public class OAuthResource implements EnvironmentAware {
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_DELETE + "')")      
 	@RequestMapping(method = RequestMethod.DELETE, value = "/clients/{clientId}")    
-    public ResponseEntity<?> deleteOAuthClient(@PathVariable String clientId) {    	
-    	
-		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
-		if (clientDetails == null) {
-			throw new OAuthClientDetailsNotFoundException(clientId);
-		}		
+    public ResponseEntity<?> deleteOAuthClient(@PathVariable String clientId) {    	    	
 		
-		oAuthClientDetailsRepository.delete(clientDetails);
+		oauthService.deleteOAuthClientDetails(clientId);
 		
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }    

@@ -15,18 +15,10 @@ import org.springframework.security.oauth2.provider.NoSuchClientException;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthClientDetails;
 import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
 
-public class CustomJdbcClientDetailsService implements ClientDetailsService, ClientRegistrationService {
+public class CustomJpaClientDetailsService implements ClientDetailsService, ClientRegistrationService {
 
-	private OAuthClientDetailsRepository clientDetailsRepository;
-	
-	@Inject	
-	public CustomJdbcClientDetailsService(OAuthClientDetailsRepository clientDetailsRepository) {
-		
-		this.clientDetailsRepository = clientDetailsRepository;				
-	}
-	
-	public CustomJdbcClientDetailsService() {
-	}
+	@Inject
+	private OAuthClientDetailsRepository clientDetailsRepository;		
 	
 	@Override
 	public void addClientDetails(ClientDetails clientDetails)
@@ -55,8 +47,8 @@ public class CustomJdbcClientDetailsService implements ClientDetailsService, Cli
 	public void updateClientSecret(String clientId, String secret)
 			throws NoSuchClientException {
 
-		OAuthClientDetails clientDetails;
-		if ((clientDetails = clientDetailsRepository.findOne(clientId)) == null) {
+		OAuthClientDetails clientDetails = clientDetailsRepository.findOne(clientId);
+		if (clientDetails == null) {
 			throw new NoSuchClientException("No client found with id = " + clientId);
 		}
 		
@@ -70,8 +62,8 @@ public class CustomJdbcClientDetailsService implements ClientDetailsService, Cli
 	public void removeClientDetails(String clientId)
 			throws NoSuchClientException {
 
-		OAuthClientDetails clientDetails;
-		if ((clientDetails = clientDetailsRepository.findOne(clientId)) == null) {
+		OAuthClientDetails clientDetails = clientDetailsRepository.findOne(clientId);
+		if (clientDetails == null) {
 			throw new NoSuchClientException("No client found with id = " + clientId);
 		}
 		
@@ -88,8 +80,8 @@ public class CustomJdbcClientDetailsService implements ClientDetailsService, Cli
 	public ClientDetails loadClientByClientId(String clientId)
 			throws ClientRegistrationException {
 
-		OAuthClientDetails clientDetails;
-		if ((clientDetails = clientDetailsRepository.findOne(clientId)) == null) {
+		OAuthClientDetails clientDetails = clientDetailsRepository.findOne(clientId);
+		if (clientDetails == null) {
 			throw new NoSuchClientException("No client with requested id: " + clientId);
 		}		
 		

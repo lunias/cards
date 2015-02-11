@@ -1,0 +1,4 @@
+resource_id;uri
+cards-oauth;http://localhost:8081
+cards-web;http://localhost:8080
+cards-game;http://localhost:8082

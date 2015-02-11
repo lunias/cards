@@ -1,0 +1,4 @@
+client_id;authority_name
+cards-oauth;ROLE_USER
+cards-web;ROLE_USER
+cards-game;ROLE_USER
