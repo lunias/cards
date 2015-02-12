@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.postgresql.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -55,8 +56,8 @@ import com.ethanaa.cards.oauth_server.domain.oauth.OAuthResource;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthScope;
 import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsRepository;
 import com.ethanaa.cards.oauth_server.security.CustomJpaClientDetailsService;
+import com.ethanaa.cards.oauth_server.service.OAuthService;
 import com.ethanaa.cards.oauth_server.service.UserService;
-import com.ethanaa.cards.oauth_server.service.util.OAuthService;
 
 @RestController
 @RequestMapping("/api/oauth")
@@ -86,7 +87,7 @@ public class OAuthEndpoint implements EnvironmentAware {
 	private OAuthService oauthService;
 	
 	@Inject
-	private OAuthClientDetailsAssembler oauthClientDetailsAssembler;
+	private OAuthClientDetailsAssembler oauthClientDetailsAssembler;	
     
     private RelaxedPropertyResolver propertyResolver;	
 	
@@ -287,13 +288,13 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * 
 	 * @param clientId
 	 * @return {@link OAuthClientDetails}
-	 */
-    @RolesAllowed(AuthorityConstants.ADMIN)
+	 */    
+	@RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_DELETE + "')")      
 	@RequestMapping(method = RequestMethod.DELETE, value = "/clients/{clientId}")    
     public ResponseEntity<?> deleteOAuthClient(@PathVariable String clientId) {    	    	
 		
-		oauthService.deleteOAuthClientDetails(clientId);
+		oauthService.deleteOAuthClientDetails(clientId);		
 		
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }    

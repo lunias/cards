@@ -1,6 +1,7 @@
 package com.ethanaa.cards.oauth_server.service;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ethanaa.cards.common.domain.PersistentAuditEvent;
 import com.ethanaa.cards.oauth_server.config.audit.AuditEventConverter;
 import com.ethanaa.cards.oauth_server.repository.PersistenceAuditEventRepository;
+import com.ethanaa.cards.oauth_server.security.SecurityUtils;
 
 /**
  * Service for managing audit events.
@@ -39,5 +41,5 @@ public class AuditEventService {
             persistenceAuditEventRepository.findAllByAuditEventDateBetween(fromDate, toDate);
 
         return auditEventConverter.convertToAuditEvent(persistentAuditEvents);
-    }
+    }    
 }

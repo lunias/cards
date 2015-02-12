@@ -2,6 +2,7 @@ package com.ethanaa.cards.oauth_server.service;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,8 @@ import javax.inject.Inject;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.audit.AuditEvent;
+import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,6 +55,9 @@ public class UserService {
     
     @Inject
     private OAuthClientDetailsRepository oauthClientDetailsRepository;
+    
+    @Inject
+    private AuditEventRepository auditEventRepository;
     
     @Transactional(readOnly = true)    
     public Page<User> getUsersWithAuthorities(Pageable pageable) {
@@ -178,22 +184,29 @@ public class UserService {
     	return userRepository.save(user);
     }
     
-    public void deleteUser(String username) throws UserNotFoundException {
+    @SuppressWarnings("serial")
+	public void deleteUser(String username) throws UserNotFoundException {
     	
     	if (username.equals(SecurityUtils.getCurrentLogin())) {
     		throw new CurrentUserDeletionException(username);
     	}
     	
-    	User user = userRepository.findOneByLogin(username);
+    	final User user = userRepository.findOneByLogin(username);
     	
     	if (user == null) {
     		throw new UserNotFoundException(username);
     	}
     	
-    	userRepository.delete(user);    	
+    	userRepository.delete(user);
+    	
+		auditEventRepository.add(new AuditEvent(SecurityUtils.getCurrentLogin(), "DELETE User", new HashMap<String, Object>() {
+			{
+				put("message", user);
+			}
+		}));    	
     }
     
-    public  User activateRegistration(String key) {
+    public User activateRegistration(String key) {
         log.debug("Activating user for activation key {}", key);
         User user = userRepository.findOneByActivationKey(key);
         // activate given user for the registration key.
