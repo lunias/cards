@@ -249,7 +249,7 @@ public class UserEndpoint {
     			clientDetails.getValue() ? HttpStatus.CREATED : HttpStatus.OK);
     }
     
-    @ApiOperation(value = "Remove an outh client from a user",
+    @ApiOperation(value = "Remove an oauth client from a user",
     		notes = "This is the endpoint for removing oauth clients "
     			  + "from a user."    		
     )
