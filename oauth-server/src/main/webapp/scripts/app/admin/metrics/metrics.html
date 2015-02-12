@@ -144,6 +144,29 @@
             </td>
         </tr>
         <tr>
+            <td>Created</td>
+            <td>
+                <div class="progress progress-striped">
+                    <div class="progress-bar progress-bar-success" role="progressbar"
+                         aria-valuenow="{{metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].count * 100 / metrics.timers['com.codahale.metrics.servlet.InstrumentedFilter.requests'].count}}"
+                         aria-valuemin="0"
+                         aria-valuemax="{{metrics.timers['com.codahale.metrics.servlet.InstrumentedFilter.requests'].count}}"
+                         ng-style="{width: ((metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].count * 100 / metrics.timers['com.codahale.metrics.servlet.InstrumentedFilter.requests'].count) | number:0) + '%'}">
+                        {{metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].count}}
+                    </div>
+            </td>
+            <td class="text-right">
+                {{metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].mean_rate | number:2}}
+            </td>
+            <td class="text-right">{{metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].m1_rate | number:2}}
+            </td>
+            <td class="text-right">{{metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].m5_rate | number:2}}
+            </td>
+            <td class="text-right">
+                {{metrics.meters['com.codahale.metrics.servlet.InstrumentedFilter.responseCodes.created'].m15_rate | number:2}}
+            </td>
+        </tr>        
+        <tr>
             <td translate="metrics.jvm.http.code.notfound">Not Found</td>
             <td>
                 <div class="progress progress-striped">

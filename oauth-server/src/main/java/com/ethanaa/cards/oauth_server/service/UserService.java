@@ -133,15 +133,16 @@ public class UserService {
     	
     	OAuthClientDetails existingClient = oauthClientDetailsRepository.findOne(resource.getClientId());
     	
-    	if (existingClient == null) {    		
-    		
-    		existingClient = oauthClientDetailsRepository.save(new OAuthClientDetails(resource));    		
+    	boolean created = false;
+    	if (existingClient == null) {    		    		
+    		existingClient = oauthClientDetailsRepository.save(new OAuthClientDetails(resource));
+    		created = true;
     	}
     		
     	user.getClientDetails().add(existingClient);
     	// TODO save user?
     	
-    	return new SimpleEntry<List<OAuthClientDetails>, Boolean>(new ArrayList<>(user.getClientDetails()), false);
+    	return new SimpleEntry<List<OAuthClientDetails>, Boolean>(new ArrayList<>(user.getClientDetails()), created);
     }
     
     public User updateUser(UserResource userResource) throws UserNotFoundException, EmailAlreadyExistsException {

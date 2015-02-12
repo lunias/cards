@@ -2,6 +2,7 @@ package com.ethanaa.cards.oauth_server.web.rest.oauth;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -230,6 +231,23 @@ public class OAuthEndpoint implements EnvironmentAware {
 		
 		return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(clientDetails), HttpStatus.OK);
 	}
+    
+	/**
+	 * POST a new {@link OAuthClientDetails} record or update an existing one with a matching {@code client_id}
+	 * 
+	 * @param {@link OAuthClientDetailsResource} request 
+	 * @return {@link OAuthClientDetails}
+	 */
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")      
+	@RequestMapping(method = RequestMethod.POST, value = "/clients")    
+    public ResponseEntity<OAuthClientDetailsResource> createOrUpdateOAuthClient(@RequestBody OAuthClientDetailsResource request) {
+    	
+    	SimpleEntry<OAuthClientDetails, Boolean> clientDetails = oauthService.createOrUpdateOAuthClientDetails(request);
+    	
+    	return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(clientDetails.getKey()),
+    			clientDetails.getValue() ? HttpStatus.CREATED : HttpStatus.OK);    	
+    }
     
 	/**
 	 * PUT a specific {@link OAuthClientDetails} record
