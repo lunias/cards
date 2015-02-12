@@ -10,13 +10,17 @@ import org.springframework.hateoas.ResourceSupport;
 import com.ethanaa.cards.oauth_server.domain.Authority;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthResource;
 import com.ethanaa.cards.oauth_server.domain.oauth.OAuthScope;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "Client details for OAuth 2")
 public class OAuthClientDetailsResource extends ResourceSupport {
 
     @NotNull
     @Size(min = 0, max = 256)
 	private String clientId;
 	
+    @ApiModelProperty(value = "Authorized OAuth2 Grant Types", allowableValues = "password,implicit,client_credentials,authorization_code,refresh_token")
 	private Set<String> authorizedGrantTypes;
 	
 	private Set<String> redirectUrls;

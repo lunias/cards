@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.postgresql.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.actuate.audit.AuditEventRepository;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -31,10 +30,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
-import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -58,7 +57,13 @@ import com.ethanaa.cards.oauth_server.repository.oauth.OAuthClientDetailsReposit
 import com.ethanaa.cards.oauth_server.security.CustomJpaClientDetailsService;
 import com.ethanaa.cards.oauth_server.service.OAuthService;
 import com.ethanaa.cards.oauth_server.service.UserService;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
+@Api(value = "oauth-endpoint", description = "/api/oauth")
 @RestController
 @RequestMapping("/api/oauth")
 public class OAuthEndpoint implements EnvironmentAware {
@@ -101,9 +106,27 @@ public class OAuthEndpoint implements EnvironmentAware {
      * @param request
      * @return {@link OAuth2AccessToken} oauth2 authorization token
      * @throws Exception
-     */
+     */    
+    @ApiOperation(value = "Exchange a username and password for an api token",
+    		consumes = MediaType.APPLICATION_JSON_VALUE, response = OAuth2AccessToken.class,
+    		notes = "This is the endpoint for obtaining api tokens from the authorization server. "
+    			  + "In order for a request to be successful the user must supply their username, "
+    			  + "password, client_id, and grant_type.")
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK",
+    											response = OAuth2AccessToken.class),
+    		@ApiResponse(code = 400, message = "Invalid request",
+    											response = InvalidClientException.class),
+    		@ApiResponse(code = 401, message = "There was an existing 'Authorization' header found "
+    										 + "or a client_id for which the user is not authorized "
+    										 + "was provided in the request",
+    										 	response = InvalidClientException.class),
+    		@ApiResponse(code = 404, message = "Username is not registered",
+    											response = AuthenticationException.class)
+    })
 	@RequestMapping(method = RequestMethod.POST, value = "/token")
 	public ResponseEntity<?> redirectWithAuthorizationHeaders(
+			@ApiParam(value = "x-www-form-urlencoded request body (e.g. username=username&password=password&grant_type=grant_type&client_id=client_id)")
 			@RequestBody String urlEncodedBody,
 			HttpServletRequest request) throws Exception {	
 		
@@ -135,7 +158,7 @@ public class OAuthEndpoint implements EnvironmentAware {
 		}
 		
 		if (requestedClientDetails == null) {
-			return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON)
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.APPLICATION_JSON)
 					.body(new InvalidClientException("User '" + username + "' is not authorized for client '" + client + "'"));				
 		}		
 		
@@ -178,6 +201,15 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * 
 	 * @return a {@link List} of  {@link OAuthResource} 
 	 */
+    @ApiOperation(value = "Get all oauth resources",
+    		notes = "This is the endpoint for obtaining information about the oauth resources "
+    			  + "which currently exist in the system."
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized")
+    })     
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
 	@RequestMapping(method = RequestMethod.GET, value = "/resources")	
@@ -191,6 +223,15 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * 
 	 * @return a {@link List} of  {@link OAuthScope} 
 	 */
+    @ApiOperation(value = "Get all oauth scopes",
+    		notes = "This is the endpoint for obtaining information about the oauth scopes "
+    			  + "which currently exist in the system."
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized")
+    })     
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
 	@RequestMapping(method = RequestMethod.GET, value = "/scopes")	
@@ -200,10 +241,47 @@ public class OAuthEndpoint implements EnvironmentAware {
 	}    
 	
 	/**
+	 * POST a new {@link OAuthClientDetails} record or update an existing one with a matching {@code client_id}
+	 * 
+	 * @param {@link OAuthClientDetailsResource} request 
+	 * @return {@link OAuthClientDetails}
+	 */
+    @ApiOperation(value = "Create or update an oauth client",
+    		notes = "This is the endpoint for adding or modifying oauth clients."
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "The client was found and updated"),
+    		@ApiResponse(code = 201, message = "A new client was created"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized")
+    })     
+    @RolesAllowed(AuthorityConstants.ADMIN)
+    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")      
+	@RequestMapping(method = RequestMethod.POST, value = "/clients")    
+    public ResponseEntity<OAuthClientDetailsResource> createOrUpdateOAuthClient(
+    		@ApiParam(value = "oauth client details", required = true)
+    		@RequestBody OAuthClientDetailsResource request) {
+    	
+    	SimpleEntry<OAuthClientDetails, Boolean> clientDetails = oauthService.createOrUpdateOAuthClientDetails(request);
+    	
+    	return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(clientDetails.getKey()),
+    			clientDetails.getValue() ? HttpStatus.CREATED : HttpStatus.OK);    	
+    }    
+    
+	/**
 	 * GET all {@link OAuthClientDetails} records
 	 * 
 	 * @return a {@link List} of  {@link OAuthClientDetails} 
 	 */
+    @ApiOperation(value = "Get all oauth clients",
+    		notes = "This is the endpoint for obtaining information about the oauth clients "
+    			  + "which currently exist in the system."    			  
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized")
+    })    
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")    	
 	@RequestMapping(method = RequestMethod.GET, value = "/clients")
@@ -212,18 +290,30 @@ public class OAuthEndpoint implements EnvironmentAware {
     	List<OAuthClientDetails> clients = oAuthClientDetailsRepository.findAll();    	
     	
 		return new ResponseEntity<>(oauthClientDetailsAssembler.toResources(clients), HttpStatus.OK);
-	}
-	
+	}	    
+    
 	/**
 	 * GET a specific {@link OAuthClientDetails} record
 	 * 
 	 * @param clientId
 	 * @return {@link OAuthClientDetails}
 	 */
+    @ApiOperation(value = "Get an oauth client",
+    		notes = "This is the endpoint for obtaining information about an oauth client "
+    			  + "which currently exists in the system."
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "OK"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized"),
+    		@ApiResponse(code = 404, message = "No client exists with the provided clientId")
+    })     
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")      
 	@RequestMapping(method = RequestMethod.GET, value = "/clients/{clientId}")
-	public ResponseEntity<OAuthClientDetailsResource> getOAuthClient(@PathVariable String clientId) {
+	public ResponseEntity<OAuthClientDetailsResource> getOAuthClient(
+			@ApiParam(value = "oauth client id", required = true)
+			@PathVariable String clientId) {
 		
 		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
 		if (clientDetails == null) {
@@ -231,24 +321,7 @@ public class OAuthEndpoint implements EnvironmentAware {
 		}
 		
 		return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(clientDetails), HttpStatus.OK);
-	}
-    
-	/**
-	 * POST a new {@link OAuthClientDetails} record or update an existing one with a matching {@code client_id}
-	 * 
-	 * @param {@link OAuthClientDetailsResource} request 
-	 * @return {@link OAuthClientDetails}
-	 */
-    @RolesAllowed(AuthorityConstants.ADMIN)
-    @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_READ + "')")      
-	@RequestMapping(method = RequestMethod.POST, value = "/clients")    
-    public ResponseEntity<OAuthClientDetailsResource> createOrUpdateOAuthClient(@RequestBody OAuthClientDetailsResource request) {
-    	
-    	SimpleEntry<OAuthClientDetails, Boolean> clientDetails = oauthService.createOrUpdateOAuthClientDetails(request);
-    	
-    	return new ResponseEntity<>(oauthClientDetailsAssembler.toResource(clientDetails.getKey()),
-    			clientDetails.getValue() ? HttpStatus.CREATED : HttpStatus.OK);    	
-    }
+	}    
     
 	/**
 	 * PUT a specific {@link OAuthClientDetails} record
@@ -257,10 +330,23 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * @param request
 	 * @return {@link OAuthClientDetails}
 	 */
+    @ApiOperation(value = "Update an oauth client",
+    		notes = "This is the endpoint for modifying oauth clients."
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "The client was found and updated"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized"),
+    		@ApiResponse(code = 404, message = "No client exists with the provided clientId")
+    })         
     @RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_WRITE + "')")      
 	@RequestMapping(method = RequestMethod.PUT, value = "/clients/{clientId}")    
-    public ResponseEntity<OAuthClientDetailsResource> updateOAuthClient(@PathVariable String clientId, @RequestBody OAuthClientDetailsResource request) {    	    	
+    public ResponseEntity<OAuthClientDetailsResource> updateOAuthClient(
+    		@ApiParam(value = "oauth client id", required = true)
+    		@PathVariable String clientId,
+    		@ApiParam(value = "oauth client details", required = true)
+    		@RequestBody OAuthClientDetailsResource request) {    	    	
     	
 		OAuthClientDetails clientDetails = oAuthClientDetailsRepository.findOne(clientId);
 		if (clientDetails == null) {
@@ -288,11 +374,22 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * 
 	 * @param clientId
 	 * @return {@link OAuthClientDetails}
-	 */    
+	 */     
+    @ApiOperation(value = "Delete an oauth client",
+    		notes = "This is the endpoint for deleting oauth clients."
+    )
+    @ApiResponses(value = {
+    		@ApiResponse(code = 204, message = "The client was found and deleted"),
+    		@ApiResponse(code = 401, message = "The user is not authenticated"),
+    		@ApiResponse(code = 403, message = "The user is not authorized"),
+    		@ApiResponse(code = 404, message = "No client exists with the provided clientId")
+    })       
 	@RolesAllowed(AuthorityConstants.ADMIN)
     @PreAuthorize("#oauth2.hasScope('" + ScopeConstants.OAUTH_DELETE + "')")      
 	@RequestMapping(method = RequestMethod.DELETE, value = "/clients/{clientId}")    
-    public ResponseEntity<?> deleteOAuthClient(@PathVariable String clientId) {    	    	
+    public ResponseEntity<?> deleteOAuthClient(
+    		@ApiParam(value = "oauth client id", required = true) 
+    		@PathVariable String clientId) {    	    	
 		
 		oauthService.deleteOAuthClientDetails(clientId);		
 		
@@ -303,20 +400,20 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * 
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/tokens")
-	public ResponseEntity<Map<String, Object>> getActiveTokens() {
-		
-		String clientId = propertyResolver.getProperty(PROP_CLIENTID);
-		
-		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);		
-		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId(clientId);	
-		
-		Map<String, Object> response = new HashMap<>();
-		response.put("clientDetails", clientDetails);
-		response.put("tokens", enhance(tokens));
-		
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+//	@RequestMapping(method = RequestMethod.GET, value = "/tokens")
+//	public ResponseEntity<Map<String, Object>> getActiveTokens() {
+//		
+//		String clientId = propertyResolver.getProperty(PROP_CLIENTID);
+//		
+//		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);		
+//		Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId(clientId);	
+//		
+//		Map<String, Object> response = new HashMap<>();
+//		response.put("clientDetails", clientDetails);
+//		response.put("tokens", enhance(tokens));
+//		
+//		return new ResponseEntity<>(response, HttpStatus.OK);
+//	}
 	
 	/**
 	 * 
@@ -325,13 +422,13 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * @param principal
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/clients/{client}/users/{username}/tokens")
-	public ResponseEntity<Collection<OAuth2AccessToken>> getTokensForAccount(@PathVariable String client, @PathVariable String username, Principal principal) {
-		
-		checkResourceOwner(username, principal);		
-		
-		return new ResponseEntity<>(enhance(tokenStore.findTokensByClientIdAndUserName(client, username)), HttpStatus.OK);		
-	}
+//	@RequestMapping(method = RequestMethod.GET, value = "/clients/{client}/users/{username}/tokens")
+//	public ResponseEntity<Collection<OAuth2AccessToken>> getTokensForAccount(@PathVariable String client, @PathVariable String username, Principal principal) {
+//		
+//		checkResourceOwner(username, principal);		
+//		
+//		return new ResponseEntity<>(enhance(tokenStore.findTokensByClientIdAndUserName(client, username)), HttpStatus.OK);		
+//	}
 	
 	/**
 	 * 
@@ -340,17 +437,17 @@ public class OAuthEndpoint implements EnvironmentAware {
 	 * @param principal
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.DELETE, value = "/users/{username}/tokens/{token}")
-	public ResponseEntity<Void> revokeToken(@PathVariable String username, @PathVariable String token, Principal principal) {
-		
-		checkResourceOwner(username, principal);
-		
-		if (tokenServices.revokeToken(token)) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
+//	@RequestMapping(method = RequestMethod.DELETE, value = "/users/{username}/tokens/{token}")
+//	public ResponseEntity<Void> revokeToken(@PathVariable String username, @PathVariable String token, Principal principal) {
+//		
+//		checkResourceOwner(username, principal);
+//		
+//		if (tokenServices.revokeToken(token)) {
+//			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//		} else {
+//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//		}
+//	}
 	
 	/**
 	 * 

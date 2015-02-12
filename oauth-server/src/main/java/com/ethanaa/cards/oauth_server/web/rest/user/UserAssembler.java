@@ -13,7 +13,7 @@ import com.ethanaa.cards.oauth_server.domain.User;
 @Component
 public class UserAssembler extends ResourceAssemblerSupport<User, UserResource> {
 
-	private static final String CLIENT_DETAILS = "clientDetails";
+	private static final String CLIENTS = "clients";
 	
 	public UserAssembler() {
 		super(UserEndpoint.class, UserResource.class);
@@ -31,7 +31,7 @@ public class UserAssembler extends ResourceAssemblerSupport<User, UserResource> 
 		}		
 		
 		resource.add(linkTo(UserEndpoint.class).slash(entity.getLogin()).withSelfRel());
-		resource.add(linkTo(UserEndpoint.class).slash(entity.getLogin()).slash(CLIENT_DETAILS).withRel(CLIENT_DETAILS));
+		resource.add(linkTo(UserEndpoint.class).slash(entity.getLogin()).slash(CLIENTS).withRel(CLIENTS));
 		
 		return resource;
 	}		

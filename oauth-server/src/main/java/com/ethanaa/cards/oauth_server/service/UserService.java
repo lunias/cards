@@ -4,6 +4,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -149,6 +150,23 @@ public class UserService {
     	// TODO save user?
     	
     	return new SimpleEntry<List<OAuthClientDetails>, Boolean>(new ArrayList<>(user.getClientDetails()), created);
+    }
+    
+    public void removeUserClientDetails(String username, String clientId) throws UserNotFoundException {
+    	
+    	User user = userRepository.findOneByLogin(username);
+    	
+    	if (user == null) {
+    		throw new UserNotFoundException(username);
+    	}    	    	
+    	
+    	for (Iterator<OAuthClientDetails> itr = user.getClientDetails().iterator(); itr.hasNext();) {
+    		OAuthClientDetails clientDetails = itr.next();
+    		if (clientDetails.getClientId().equals(clientId)) {
+    			itr.remove();
+    			break;
+    		}
+    	}    	    	
     }
     
     public User updateUser(UserResource userResource) throws UserNotFoundException, EmailAlreadyExistsException {
