@@ -80,6 +80,44 @@
 			{{ role }} </ui-select-choices> </ui-select>
 
 		</div>
+		
+      <select
+      	      class="modal-listbox"
+              ng-model="userClients"
+              ng-options="client.clientId as client.clientId for client in availableClients"
+              multiple
+              bs-duallistbox
+              bootstrap2="{{ settings.bootstrap2 }}"
+
+              move-on-select="{{ settings.moveOnSelect }}"
+              preserve-selection="{{ settings.preserveSelection }}"
+
+              move-selected-label="{{ settings.moveSelectedLabel }}"
+              move-all-label="{{ settings.moveAllLabel }}"
+              remove-selected-label="{{ settings.removeSelectedLabel }}"
+              remove-all-label="{{ settings.removeAllLabel }}"
+
+              non-selected-list-label="{{ settings.nonSelectedListLabel }}"
+              selected-list-label="{{ settings.selectedListLabel }}"
+
+              postfix="{{ settings.postfix }}"
+              select-min-height="{{ settings.selectMinHeight }}"
+
+              filter="{{ settings.filter }}"
+              filter-values="{{ settings.filterValues }}"
+              filter-non-selected="settings.filterNonSelected"
+              filter-selected="settings.filterSelected"
+              filter-placeholder="{{ settings.filterPlaceholder }}"
+              filter-clear="{{ settings.filterClear }}"
+              info-all="{{ settings.infoAll }}"
+              info-filtered="{{ settings.infoFiltered }}"
+              info-empty="{{ settings.infoEmpty }}"
+      >
+      </select>
+      
+      <div class="row pull-right" style="padding: 15px 15px 0px 0px;">
+        <button type="button" class="btn btn-success" ng-click="addClient()">Add client</button>
+      </div>
 
 	</form>
 

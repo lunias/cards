@@ -16,6 +16,10 @@ angular.module('cardsOauthApp').factory('User', function($resource) {
         	}
         },
         
+        'findAllClients': { method: 'GET', isArray: true,
+        	url: 'api/users/:login/clients' 
+        },        
+        
         'update': { method: 'PUT' },
         'remove': { method: 'DELETE' }
     });	

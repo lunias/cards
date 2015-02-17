@@ -109,3 +109,27 @@ ul#strength {
 	background-color: #DFF0D8 !important;
 	cursor: pointer;
 }
+
+.modal {
+    &.center {
+        .modal-dialog {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            min-width: 320px;
+            max-width: 1000px;
+            width: 80%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+    }
+
+    .modal-header {
+        background-color: #428bca;        
+        color: #ffffff;
+    }
+
+    .modal-body {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+}

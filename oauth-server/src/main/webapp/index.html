@@ -14,7 +14,8 @@
         <link rel="stylesheet" href="assets/styles/main.css">
         <link rel="stylesheet" href="bower_components/uigrid/ui-grid.css">
 		<link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.css">
-		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">		        
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+	    <link rel="stylesheet" href="bower_components/bootstrap-duallistbox/dist/bootstrap-duallistbox.css">
         <!-- endbuild -->
     </head>
     <body ng-app="cardsOauthApp">
@@ -58,6 +59,8 @@
         <script src="bower_components/uigrid/ui-grid.js"></script>
 		<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 		<script src="bower_components/angular-ui-select/dist/select.js"></script>
+		<script src="bower_components/bootstrap-duallistbox/dist/jquery.bootstrap-duallistbox.js"></script>
+		<script src="bower_components/angular-bootstrap-duallistbox/dist/angular-bootstrap-duallistbox.js"></script>
 		<script src="bower_components/bootstrap-sass/vendor/assets/javascripts/bootstrap/affix.js"></script>
         <script src="bower_components/bootstrap-sass/vendor/assets/javascripts/bootstrap/alert.js"></script>
         <script src="bower_components/bootstrap-sass/vendor/assets/javascripts/bootstrap/dropdown.js"></script>
@@ -89,6 +92,7 @@
         <script src="scripts/components/admin/configuration.service.js"></script>
         <script src="scripts/components/admin/monitoring.service.js"></script>
         <script src="scripts/components/admin/user.service.js"></script>        
+        <script src="scripts/components/admin/oauth.service.js"></script>                
         <script src="scripts/components/navbar/navbar.directive.js"></script>
         <script src="scripts/components/navbar/navbar.controller.js"></script>
         <script src="scripts/components/util/truncate.filter.js"></script>
@@ -125,7 +129,7 @@
         <script src="scripts/app/main/main.js"></script>
         <script src="scripts/app/main/main.controller.js"></script>
         <script src="scripts/app/user/editUserModal.controller.js"></script>        
-        <script src="scripts/app/user/confirmDeleteUserModal.controller.js"></script>                
+        <script src="scripts/app/user/deleteUserConfirmModal.controller.js"></script>                
         <script src="scripts/components/auth/provider/auth.oauth2.service.js"></script>
         <!-- endbuild -->
 </body>

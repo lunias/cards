@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('cardsOauthApp').controller('MainController',
-		function($scope, $q, $templateCache, $modal, Principal, User, Authority) {
+		function($scope, $q, $templateCache, $modal, Principal, User, Authority, OAuth) {
 
 			$scope.isAuthenticated = Principal.isAuthenticated;
 			$scope.isInRole = Principal.isInRole;
@@ -140,7 +140,7 @@ angular.module('cardsOauthApp').controller('MainController',
 			  		edit: function (user, field) {
 
 			  			var modalInstance = $modal.open({
-			  				templateUrl: 'editUserModal.html',
+			  				templateUrl: 'scripts/app/user/editUserModal.html',
 			  				controller: 'EditUserModalController',
 			  				size: 'lg',
 			  				resolve: {
@@ -162,6 +162,25 @@ angular.module('cardsOauthApp').controller('MainController',
 			  							
 				  						deferred.resolve(mapped);
 			  						});			  						
+			  						
+			  						return deferred.promise;
+			  					},
+			  					availableClients: function() {
+			  						
+			  						return OAuth.findAllClients();
+			  					},
+			  					userClients: function() {
+			  						
+			  						var deferred = $q.defer();
+			  						
+			  						User.findAllClients({login: user.login}, function(clients) {
+			  							
+			  							var mapped = clients.map(function(client) {
+			  								return client.clientId;
+			  							});
+			  							
+			  							deferred.resolve(mapped);
+			  						});
 			  						
 			  						return deferred.promise;
 			  					}

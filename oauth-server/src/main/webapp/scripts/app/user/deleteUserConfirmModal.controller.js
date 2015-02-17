@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('cardsOauthApp').controller('ConfirmDeleteUserModalController', function($scope, $modalInstance, user) {
+angular.module('cardsOauthApp').controller('DeleteUserConfirmModalController', function($scope, $modalInstance, user) {
 
 	$scope.user = user;
 	
